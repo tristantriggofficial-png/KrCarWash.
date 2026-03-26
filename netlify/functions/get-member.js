@@ -1,11 +1,14 @@
 exports.handler = async function(event) {
-  var contactId = event.queryStringParameters && event.queryStringParameters.id ? event.queryStringParameters.id : '';
+  var contactId = event.queryStringParameters && event.queryStringParameters.id ? event.queryStringParameters.id.trim() : '';
   var apiKey = process.env.GHL_API_KEY;
-  if (!contactId) { return { statusCode: 400, body: JSON.stringify({ error: 'No contact ID provided' }) }; }
+  var locationId = process.env.GHL_LOCATION_ID;
+  if (!contactId) { return { statusCode: 200, body: JSON.stringify({ found: false, reason: 'no id' }) }; }
   try {
-    var response = await fetch('https://services.leadconnectorhq.com/contacts/' + contactId, { headers: { 'Authorization': 'Bearer ' + apiKey, 'Version': '2021-07-28' } });
-    var contact = await response.json();
-    if (!contact || !contact.id) { return { statusCode: 200, body: JSON.stringify({ found: false }) }; }
+    var response = await fetch('https://services.leadconnectorhq.com/contacts/?locationId=' + locationId + '&limit=100', { headers: { 'Authorization': 'Bearer ' + apiKey, 'Version': '2021-07-28' } });
+    var data = await response.json();
+    var contacts = data.contacts || [];
+    var contact = contacts.find(function(c) { return c.id === contactId; });
+    if (!contact) { return { statusCode: 200, body: JSON.stringify({ found: false, reason: 'contact not found', searched: contacts.length }) }; }
     var fields = contact.customFields || [];
     var STATUS_ID = '96LLYXgqD2RuO5287zAb';
     var V1_MAKE   = 'DP3tVjiga7PPqKrztB0D';
