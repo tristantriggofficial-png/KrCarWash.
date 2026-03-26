@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,32 +9,554 @@
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 :root {
---blue-dark: #1a6fa8;
---blue-mid: #2e9fd4;
---blue-pale: #d6eef8;
---yellow: #f5c518;
---text-dark: #0d2a3e;
---text-mid: #2a5470;
---white: #ffffff;
---off-white: #f4faff;
---green: #16a34a;
---green-bg: #dcfce7;
---red: #dc2626;
---red-bg: #fee2e2;
+  --blue-dark: #1a6fa8;
+  --blue-mid: #2e9fd4;
+  --blue-pale: #d6eef8;
+  --yellow: #f5c518;
+  --text-dark: #0d2a3e;
+  --text-mid: #2a5470;
+  --white: #ffffff;
+  --off-white: #f4faff;
+  --green: #16a34a;
+  --red: #dc2626;
 }
 
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
 body {
-font-family: 'Barlow', sans-serif;
-background: #0d2a3e;
-color: var(--white);
-min-height: 100vh;
-display: flex;
-flex-direction: column;
-overflow-x: hidden;
+  font-family: 'Barlow', sans-serif;
+  background: #0d2a3e;
+  color: var(--white);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
+header {
+  background: rgba(26,111,168,0.97);
+  padding: 0 1.5rem;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  flex-shrink: 0;
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 3px;
+  color: var(--white);
+}
+
+.logo span { color: var(--yellow); }
+
+.staff-badge {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: rgba(245,197,24,0.2);
+  border: 1px solid rgba(245,197,24,0.4);
+  color: var(--yellow);
+  padding: 4px 12px;
+  border-radius: 100px;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  gap: 1.5rem;
+}
+
+#idleState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4rem;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+
+.idle-icon {
+  width: 100px; height: 100px;
+  background: rgba(46,159,212,0.15);
+  border: 3px solid rgba(46,159,212,0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.8rem;
+}
+
+.idle-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.2rem;
+  letter-spacing: 3px;
+  color: var(--white);
+  line-height: 1;
+}
+
+.idle-sub {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.6;
+}
+
+.scan-btn {
+  width: 100%;
+  background: var(--yellow);
+  color: var(--text-dark);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 3px;
+  padding: 18px 24px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 24px rgba(245,197,24,0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.scan-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 12px rgba(245,197,24,0.2);
+}
+
+.divider {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: rgba(255,255,255,0.2);
+  font-size: 0.78rem;
+  letter-spacing: 2px;
+  font-family: 'Barlow Condensed', sans-serif;
+  text-transform: uppercase;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+}
+
+.plate-search {
+  width: 100%;
+  display: flex;
+  gap: 0.6rem;
+}
+
+.plate-input {
+  flex: 1;
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  padding: 13px 16px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 4px;
+  color: var(--white);
+  text-transform: uppercase;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.plate-input::placeholder {
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 3px;
+}
+
+.plate-input:focus { border-color: var(--blue-mid); }
+
+.plate-search-btn {
+  background: var(--blue-mid);
+  border: none;
+  border-radius: 10px;
+  padding: 13px 18px;
+  cursor: pointer;
+  color: var(--white);
+  font-size: 1.2rem;
+  transition: background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.plate-search-btn:active { background: var(--blue-dark); }
+
+#scannerState {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 380px;
+  gap: 1rem;
+}
+
+.scanner-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--yellow);
+}
+
+#qr-reader {
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 3px solid rgba(245,197,24,0.4);
+  box-shadow: 0 0 40px rgba(245,197,24,0.15);
+}
+
+#qr-reader img { display: none !important; }
+#qr-reader__scan_region { background: transparent !important; }
+#qr-reader__dashboard { display: none !important; }
+
+.cancel-btn {
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  color: rgba(255,255,255,0.6);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 12px 28px;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cancel-btn:active { background: rgba(255,255,255,0.15); color: var(--white); }
+
+#resultOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  animation: resultPop 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+@keyframes resultPop {
+  from { opacity:0; transform: scale(0.85); }
+  to { opacity:1; transform: scale(1); }
+}
+
+#resultOverlay.active { display: flex; }
+#resultOverlay.active-green { background: var(--green); }
+#resultOverlay.active-red { background: var(--red); }
+
+.result-icon {
+  font-size: 7rem;
+  line-height: 1;
+  margin-bottom: 1rem;
+  animation: iconBounce 0.4s 0.2s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+@keyframes iconBounce {
+  from { opacity:0; transform: scale(0.5); }
+  to { opacity:1; transform: scale(1); }
+}
+
+.result-status {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(4rem, 18vw, 7rem);
+  letter-spacing: 6px;
+  color: var(--white);
+  line-height: 1;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.result-member-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.9);
+  margin-top: 0.6rem;
+  text-transform: uppercase;
+}
+
+.result-vehicle {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.7);
+  margin-top: 0.3rem;
+  letter-spacing: 1px;
+}
+
+.result-plate {
+  display: inline-block;
+  background: rgba(255,255,255,0.2);
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 6px;
+  padding: 4px 16px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 4px;
+  margin-top: 0.5rem;
+}
+
+.result-timestamp {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.45);
+  margin-top: 1.2rem;
+  letter-spacing: 1px;
+}
+
+.result-dismiss-btn {
+  margin-top: 2rem;
+  background: rgba(255,255,255,0.2);
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 12px;
+  color: var(--white);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 3px;
+  padding: 16px 48px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s;
+}
+
+.result-dismiss-btn:active { background: rgba(255,255,255,0.3); }
+
+.recent-wrap { width: 100%; max-width: 380px; }
+
+.recent-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.68rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 0.6rem;
+}
+
+.recent-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 10px 14px;
+  border-left: 4px solid transparent;
+}
+
+.recent-item.green { border-left-color: var(--green); }
+.recent-item.red { border-left-color: var(--red); }
+
+.recent-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--white);
+}
+
+.recent-plate { font-size: 0.78rem; color: rgba(255,255,255,0.4); margin-top: 1px; }
+
+.recent-status { font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem; letter-spacing: 2px; }
+.recent-status.green { color: #4ade80; }
+.recent-status.red { color: #f87171; }
+.recent-time { font-size: 0.72rem; color: rgba(255,255,255,0.3); margin-top: 1px; text-align: right; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">K<span>&</span>R Car Wash</div>
+  <div class="staff-badge">Staff Scanner</div>
+</header>
+
+<main>
+  <div id="idleState">
+    <div class="idle-icon">📷</div>
+    <div>
+      <div class="idle-title">Member Scanner</div>
+      <p class="idle-sub">Scan a member's QR code or search by license plate to verify membership status.</p>
+    </div>
+
+    <button class="scan-btn" onclick="startScanner()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="22" height="22">
+        <path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/>
+        <rect x="7" y="7" width="10" height="10" rx="1"/>
+      </svg>
+      Scan QR Code
+    </button>
+
+    <div class="divider">or search by plate</div>
+
+    <div class="plate-search">
+      <input type="text" class="plate-input" id="plateInput" placeholder="ABC 1234" maxlength="10" onkeydown="if(event.key==='Enter') searchPlate()"/>
+      <button class="plate-search-btn" onclick="searchPlate()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="scannerState">
+    <div class="scanner-label">📷 Point camera at QR code</div>
+    <div id="qr-reader"></div>
+    <button class="cancel-btn" onclick="stopScanner()">✕ Cancel</button>
+  </div>
+
+  <div class="recent-wrap" id="recentWrap" style="display:none;">
+    <div class="recent-title">Recent Scans</div>
+    <div class="recent-list" id="recentList"></div>
+  </div>
+</main>
+
+<div id="resultOverlay">
+  <div class="result-icon" id="resultIcon"></div>
+  <div class="result-status" id="resultStatus"></div>
+  <div class="result-member-name" id="resultName"></div>
+  <div class="result-vehicle" id="resultVehicle"></div>
+  <div class="result-plate" id="resultPlate"></div>
+  <div class="result-timestamp" id="resultTime"></div>
+  <button class="result-dismiss-btn" onclick="dismissResult()">Tap to Scan Next</button>
+</div>
+
+<script>
+let scanner = null;
+let recentScans = [];
+
+async function lookupMember(query) {
+  query = query.trim().toUpperCase().replace(/\s/g, '');
+  try {
+    const res = await fetch(`/.netlify/functions/lookup-member?plate=${query}`);
+    const data = await res.json();
+    if (!data.found) return null;
+    return data;
+  } catch (err) {
+    console.error('Lookup error:', err);
+    return null;
+  }
+}
+
+async function showResult(member, query) {
+  const overlay = document.getElementById('resultOverlay');
+  const isActive = member && member.status.toLowerCase() === 'active';
+  const notFound = !member;
+
+  overlay.className = 'active ' + (notFound ? 'active-red' : isActive ? 'active-green' : 'active-red');
+
+  document.getElementById('resultIcon').textContent = notFound ? '❓' : isActive ? '✅' : '❌';
+  document.getElementById('resultStatus').textContent = notFound ? 'NOT FOUND' : isActive ? 'ACTIVE' : 'INACTIVE';
+  document.getElementById('resultName').textContent = notFound ? 'No membership found' : member.name;
+
+  if (!notFound) {
+    const vehicles = [member.vehicle1, member.vehicle2, member.vehicle3].filter(v => v && v.trim().length > 0);
+    document.getElementById('resultVehicle').textContent = vehicles.join(' · ');
+  } else {
+    document.getElementById('resultVehicle').textContent = '';
+  }
+
+  document.getElementById('resultPlate').textContent = notFound ? query.toUpperCase() : member.plate;
+  document.getElementById('resultTime').textContent = 'Scanned at ' + new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+  overlay.style.display = 'flex';
+
+  if (member) {
+    recentScans.unshift({
+      name: member.name,
+      plate: member.plate,
+      status: member.status,
+      time: new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })
+    });
+    if (recentScans.length > 5) recentScans.pop();
+    renderRecent();
+  }
+}
+
+function dismissResult() {
+  const overlay = document.getElementById('resultOverlay');
+  overlay.className = '';
+  overlay.style.display = 'none';
+}
+
+function renderRecent() {
+  const wrap = document.getElementById('recentWrap');
+  const list = document.getElementById('recentList');
+  if (recentScans.length === 0) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  list.innerHTML = recentScans.map(s => `
+    <div class="recent-item ${s.status.toLowerCase() === 'active' ? 'green' : 'red'}">
+      <div>
+        <div class="recent-name">${s.name}</div>
+        <div class="recent-plate">${s.plate}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="recent-status ${s.status.toLowerCase() === 'active' ? 'green' : 'red'}">${s.status.toUpperCase()}</div>
+        <div class="recent-time">${s.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function startScanner() {
+  document.getElementById('idleState').style.display = 'none';
+  document.getElementById('scannerState').style.display = 'flex';
+  scanner = new Html5Qrcode('qr-reader');
+  scanner.start(
+    { facingMode: 'environment' },
+    { fps: 10, qrbox: { width: 250, height: 250 } },
+    async (decodedText) => {
+      stopScanner();
+      const member = await lookupMember(decodedText);
+      showResult(member, decodedText);
+    },
+    () => {}
+  ).catch(err => {
+    console.error('Camera error:', err);
+    stopScanner();
+    alert('Camera not available. Please allow camera access and try again.');
+  });
+}
+
+function stopScanner() {
+  if (scanner) { scanner.stop().catch(() => {}); scanner = null; }
+  document.getElementById('scannerState').style.display = 'none';
+  document.getElementById('idleState').style.display = 'flex';
+}
+
+async function searchPlate() {
+  const val = document.getElementById('plateInput').value.trim();
+  if (!val) return;
+  const member = await lookupMember(val);
+  showResult(member, val);
+  document.getElementById('plateInput').value = '';
+}
+
+document.getElementById('plateInput').addEventListener('input', function() {
+  this.value = this.value.toUpperCase();
+});
+</script>
+</body>
+</html>
 /* ── HEADER ── */
 header {
 background: rgba(26,111,168,0.97);
