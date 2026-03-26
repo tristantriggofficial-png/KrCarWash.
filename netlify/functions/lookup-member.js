@@ -1,19 +1,11 @@
 exports.handler = async function(event) {
   const plate = (event.queryStringParameters?.plate || '').toUpperCase().replace(/\s/g, '');
-
-  if (!plate) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'No plate provided' })
-    };
-  }
-
   const apiKey = process.env.GHL_API_KEY;
   const locationId = process.env.GHL_LOCATION_ID;
 
   try {
     const response = await fetch(
-      `https://services.leadconnectorhq.com/contacts/?locationId=${locationId}&limit=100`,
+      `https://services.leadconnectorhq.com/contacts/?locationId=${locationId}&limit=10`,
       {
         headers: {
           'Authorization': `Bearer ${apiKey}`,
@@ -26,15 +18,23 @@ exports.handler = async function(event) {
     const data = await response.json();
     const contacts = data.contacts || [];
 
-    const match = contacts.find(c => {
-      const fields = c.customFields || [];
-      return fields.some(f => {
-        const key = (f.id || f.fieldKey || '').toLowerCase();
-        const val = (f.value || '').toString().toUpperCase().replace(/\s/g, '');
-        const isPlateField = key.includes('license_plate') || key.includes('license') || key.includes('plate');
-        return isPlateField && val === plate;
-      });
-    });
+    const debug = contacts.map(c => ({
+      name: `${c.firstName} ${c.lastName}`,
+      customFields: c.customFields || []
+    }));
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ plate, totalContacts: contacts.length, debug })
+    };
+
+  } catch (err) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message })
+    };
+  }
+};    });
 
     if (!match) {
       return {
