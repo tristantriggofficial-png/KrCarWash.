@@ -13,7 +13,7 @@ exports.handler = async function(event) {
 
   try {
     const response = await fetch(
-      `https://services.leadconnectorhq.com/contacts/?locationId=${locationId}&query=${plate}`,
+      `https://services.leadconnectorhq.com/contacts/?locationId=${locationId}&limit=100`,
       {
         headers: {
           'Authorization': `Bearer ${apiKey}`,
@@ -28,9 +28,12 @@ exports.handler = async function(event) {
 
     const match = contacts.find(c => {
       const fields = c.customFields || [];
-      return fields.some(f =>
-        f.value?.toString().toUpperCase().replace(/\s/g, '') === plate
-      );
+      return fields.some(f => {
+        const key = (f.id || f.fieldKey || '').toLowerCase();
+        const val = (f.value || '').toString().toUpperCase().replace(/\s/g, '');
+        const isPlateField = key.includes('license_plate') || key.includes('license') || key.includes('plate');
+        return isPlateField && val === plate;
+      });
     });
 
     if (!match) {
@@ -41,7 +44,16 @@ exports.handler = async function(event) {
     }
 
     const fields = match.customFields || [];
-    const getField = (key) => fields.find(f => f.id === key || f.fieldKey?.includes(key))?.value || '';
+    const getField = (key) => {
+      const f = fields.find(f =>
+        (f.id || f.fieldKey || '').toLowerCase().includes(key.toLowerCase())
+      );
+      return f?.value || '';
+    };
+
+    const v1 = [getField('vehicle_make'), getField('vehicle_model'), getField('vehicle_year')].filter(Boolean).join(' ');
+    const v2 = [getField('vehicle_2_make'), getField('vehicle_2_model'), getField('vehicle_2_year')].filter(Boolean).join(' ');
+    const v3 = [getField('vehicle_3_make'), getField('vehicle_3_model'), getField('vehicle_3_year')].filter(Boolean).join(' ');
 
     return {
       statusCode: 200,
@@ -50,9 +62,9 @@ exports.handler = async function(event) {
         name: `${match.firstName} ${match.lastName}`,
         status: getField('membership_status') || 'unknown',
         plate: plate,
-        vehicle1: `${getField('vehicle_make')} ${getField('vehicle_model')} ${getField('vehicle_year')}`.trim(),
-        vehicle2: `${getField('vehicle_2_make')} ${getField('vehicle_2_model')} ${getField('vehicle_2_year')}`.trim(),
-        vehicle3: `${getField('vehicle_3_make')} ${getField('vehicle_3_model')} ${getField('vehicle_3_year')}`.trim(),
+        vehicle1: v1,
+        vehicle2: v2,
+        vehicle3: v3,
       })
     };
 
