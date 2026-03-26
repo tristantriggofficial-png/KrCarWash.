@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>K&R Car Wash — Membership Status</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
 <style>
   :root {
     --blue-dark:  #1a6fa8;
@@ -49,7 +49,7 @@
   .loading-text { font-family:'Barlow Condensed',sans-serif; font-size:0.9rem; letter-spacing:2px; text-transform:uppercase; color:var(--text-mid); }
 
   /* ERROR */
-  .error-state { text-align:center; padding:3rem 1rem; }
+  .error-state { text-align:center; padding:3rem 1rem; width:100%; }
   .error-icon { font-size:3rem; margin-bottom:1rem; }
   .error-text { font-family:'Barlow Condensed',sans-serif; font-size:1rem; letter-spacing:1px; color:var(--text-mid); }
 
@@ -235,14 +235,25 @@
   <p>
     K&R Car Wash · 81729 Hwy 111, Indio CA 92201<br>
     <a href="tel:7609724030">(760) 972-4030</a> ·
-    <a href="mailto:kandrinc111@gmail.com">kandrinc111@gmail.com</a>
+    <a href="/cdn-cgi/l/email-protection#a9c2c8c7cddbc0c7ca989898e9cec4c8c0c587cac6c4"><span class="__cf_email__" data-cfemail="462d272822342f282577777706212b272f2a6825292b">[email&#160;protected]</span></a>
   </p>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 var memberData = null;
 
 function isBlank(val) { return !val || val.trim() === ''; }
+
+function loadQRLibrary() {
+  return new Promise(function(resolve) {
+    if (window.QRCode) { resolve(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+    s.onload = resolve;
+    s.onerror = resolve;
+    document.head.appendChild(s);
+  });
+}
 
 async function loadMember() {
   var params = new URLSearchParams(window.location.search);
@@ -253,6 +264,7 @@ async function loadMember() {
     var data = await res.json();
     if (!data.found) { showError(); return; }
     memberData = data;
+    await loadQRLibrary();
     renderMember(data);
   } catch (err) { showError(); }
 }
@@ -325,16 +337,3 @@ function openQR() {
 }
 
 function closeQR() {
-  document.getElementById('qrOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function closeQROutside(e) {
-  if (e.target === document.getElementById('qrOverlay')) closeQR();
-}
-
-loadMember();
-</script>
-
-</body>
-</html>
