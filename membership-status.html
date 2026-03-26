@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>K&R Car Wash — Membership Status</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+  :root {
+    --blue-dark:  #1a6fa8;
+    --blue-mid:   #2e9fd4;
+    --blue-pale:  #d6eef8;
+    --yellow:     #f5c518;
+    --text-dark:  #0d2a3e;
+    --text-mid:   #2a5470;
+    --white:      #ffffff;
+    --off-white:  #f4faff;
+    --green:      #16a34a;
+    --red:        #dc2626;
+  }
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--off-white);
+    color: var(--text-dark);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  header {
+    background: rgba(26,111,168,0.97);
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.2rem;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 3px;
+    color: var(--white);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .logo span { color: var(--yellow); }
+
+  .qr-btn {
+    margin-left: auto;
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.35);
+    border-radius: 10px;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    z-index: 1;
+  }
+
+  .qr-btn:active { background: rgba(255,255,255,0.25); }
+
+  .qr-btn svg { width: 22px; height: 22px; }
+
+  /* QR MODAL OVERLAY */
+  .qr-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(13,42,62,0.85);
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    animation: fadeIn 0.2s ease both;
+  }
+
+  .qr-overlay.open { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity:0; }
+    to   { opacity:1; }
+  }
+
+  .qr-modal {
+    background: var(--white);
+    border-radius: 24px;
+    padding: 2rem 2rem 1.6rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    max-width: 320px;
+    width: 100%;
+    animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1) both;
+    position: relative;
+  }
+
+  @keyframes popIn {
+    from { opacity:0; transform:scale(0.85); }
+    to   { opacity:1; transform:scale(1); }
+  }
+
+  .qr-modal-close {
+    position: absolute;
+    top: 14px; right: 14px;
+    background: var(--off-white);
+    border: none;
+    border-radius: 50%;
+    width: 30px; height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-mid);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .qr-modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 3px;
+    color: var(--text-dark);
+  }
+
+  .qr-modal-sub {
+    font-size: 0.78rem;
+    color: var(--text-mid);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .qr-member-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    color: var(--blue-dark);
+    text-align: center;
+  }
+
+  #qrCanvas {
+    border-radius: 12px;
+    border: 3px solid var(--blue-pale);
+    display: block;
+  }
+
+  /* MAIN */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 1.5rem 3rem;
+    gap: 1.4rem;
+    max-width: 480px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* STATUS BANNER */
+  .status-banner {
+    width: 100%;
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+  }
+
+  .status-banner::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 150px; height: 150px;
+    background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  #statusBanner.is-active   { background: linear-gradient(145deg, #14532d, #16a34a); }
+  #statusBanner.is-inactive { background: linear-gradient(145deg, #7f1d1d, #dc2626); }
+  #statusBanner.is-unknown  { background: linear-gradient(145deg, #374151, #6b7280); }
+
+  .status-icon {
+    font-size: 4rem;
+    margin-bottom: 0.8rem;
+    display: block;
+    animation: iconPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+
+  @keyframes iconPop {
+    from { opacity:0; transform:scale(0.5); }
+    to   { opacity:1; transform:scale(1); }
+  }
+
+  .status-word {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.5rem, 16vw, 5.5rem);
+    color: var(--white);
+    letter-spacing: 6px;
+    line-height: 1;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    animation: fadeUp 0.4s 0.1s ease both;
+  }
+
+  .status-tagline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.88rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+    margin-top: 0.6rem;
+    animation: fadeUp 0.4s 0.2s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* DIGITAL MEMBERSHIP CARD */
+  .membership-card {
+    width: 100%;
+    background: linear-gradient(135deg, #0d2a3e 0%, #1a6fa8 60%, #2e9fd4 100%);
+    border-radius: 20px;
+    padding: 1.8rem;
+    box-shadow: 0 8px 32px rgba(13,42,62,0.25);
+    animation: fadeUp 0.4s 0.2s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .membership-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(245,197,24,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.4rem;
+  }
+
+  .card-brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 3px;
+    color: var(--white);
+  }
+
+  .card-brand span { color: var(--yellow); }
+
+  .card-badge {
+    background: rgba(245,197,24,0.2);
+    border: 1px solid rgba(245,197,24,0.5);
+    border-radius: 100px;
+    padding: 3px 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--yellow);
+  }
+
+  .card-member-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    color: var(--white);
+    margin-bottom: 0.2rem;
+  }
+
+  .card-plan-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 1.2rem;
+  }
+
+  .card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .card-member-id-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 2px;
+  }
+
+  .card-member-id {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .card-status-pill {
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+  }
+
+  .card-status-pill.active   { background: var(--green); color: var(--white); }
+  .card-status-pill.inactive { background: var(--red);   color: var(--white); }
+  .card-status-pill.unknown  { background: #6b7280;      color: var(--white); }
+
+  /* MEMBER INFO */
+  .member-card {
+    width: 100%;
+    background: var(--white);
+    border-radius: 16px;
+    padding: 1.6rem 1.8rem;
+    border: 2px solid var(--blue-pale);
+    box-shadow: 0 4px 20px rgba(13,42,62,0.07);
+    animation: fadeUp 0.4s 0.25s ease both;
+  }
+
+  .card-section-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.68rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--blue-mid);
+    margin-bottom: 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid var(--blue-pale);
+  }
+
+  .member-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--blue-pale);
+  }
+
+  .member-field:last-child { border-bottom: none; }
+
+  .field-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-mid);
+  }
+
+  .field-value {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    text-align: right;
+  }
+
+  /* PLATE BADGE */
+  .plate-badge {
+    width: 100%;
+    background: var(--text-dark);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.8rem;
+  }
+
+  .plate-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.68rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+
+  .plate-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 5px;
+    color: var(--yellow);
+  }
+
+  /* PLAN TILE */
+  .plan-tile {
+    width: 100%;
+    background: linear-gradient(135deg, #0d2a3e, #1a6fa8);
+    border-radius: 14px;
+    padding: 1.2rem 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: fadeUp 0.4s 0.35s ease both;
+  }
+
+  .plan-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    color: var(--white);
+  }
+
+  .plan-sub {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.5);
+    margin-top: 2px;
+  }
+
+  .hidden { display: none !important; }
+
+  footer {
+    background: var(--text-dark);
+    padding: 1.2rem;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  footer p {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.3);
+    line-height: 1.6;
+  }
+
+  footer a { color: rgba(255,255,255,0.45); text-decoration: none; }
+  footer a:hover { color: var(--yellow); }
+</style>
+</head>
+<body>
+
+<!-- HEADER with QR button -->
+<header>
+  <div class="logo">K<span>&</span>R Car Wash</div>
+  <button class="qr-btn" onclick="openQR()" aria-label="Show QR Code">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+      <rect x="3" y="14" width="7" height="7" rx="1"/>
+      <path d="M14 14h2v2h-2zM18 14h3M14 18v3M18 18h3v3h-3z"/>
+    </svg>
+  </button>
+</header>
+
+<!-- QR MODAL -->
+<div class="qr-overlay" id="qrOverlay" onclick="closeQROutside(event)">
+  <div class="qr-modal">
+    <button class="qr-modal-close" onclick="closeQR()">✕</button>
+    <div class="qr-modal-title">My Membership</div>
+    <div class="qr-member-name" id="qrName">{{contact.first_name}} {{contact.last_name}}</div>
+    <canvas id="qrCanvas"></canvas>
+    <p class="qr-modal-sub">Show this to staff or let them search your license plate.</p>
+  </div>
+</div>
+
+<main>
+
+  <!-- STATUS BANNER -->
+  <div class="status-banner" id="statusBanner">
+    <span class="status-icon" id="statusIcon"></span>
+    <div class="status-word" id="statusWord"></div>
+    <div class="status-tagline" id="statusTagline"></div>
+  </div>
+
+  <!-- DIGITAL MEMBERSHIP CARD -->
+  <div class="membership-card">
+    <div class="card-top">
+      <div class="card-brand">K<span>&</span>R Car Wash</div>
+      <div class="card-badge">Unlimited Club</div>
+    </div>
+    <div class="card-member-name">{{contact.first_name}} {{contact.last_name}}</div>
+    <div class="card-plan-name">Unlimited Wash Member</div>
+    <div class="card-bottom">
+      <div>
+        <div class="card-member-id-label">Member ID</div>
+        <div class="card-member-id" id="cardMemberId">{{contact.member_id}}</div>
+      </div>
+      <div class="card-status-pill" id="cardStatusPill">Active</div>
+    </div>
+  </div>
+
+  <!-- MEMBER INFO -->
+  <div class="member-card">
+    <div class="card-section-label">👤 Member Information</div>
+    <div class="member-field">
+      <span class="field-label">Name</span>
+      <span class="field-value">{{contact.first_name}} {{contact.last_name}}</span>
+    </div>
+    <div class="member-field">
+      <span class="field-label">Phone</span>
+      <span class="field-value">{{contact.phone}}</span>
+    </div>
+  </div>
+
+  <!-- VEHICLE 1 -->
+  <div class="member-card" id="vehicle1Section">
+    <div class="card-section-label">🚗 Vehicle 1</div>
+    <div class="member-field">
+      <span class="field-label">Make & Model</span>
+      <span class="field-value" id="v1Info">{{contact.vehicle_make}} {{contact.vehicle_model}}</span>
+    </div>
+    <div class="plate-badge">
+      <span class="plate-label">License Plate</span>
+      <span class="plate-number" id="v1Plate">{{contact.license_plate}}</span>
+    </div>
+  </div>
+
+  <!-- VEHICLE 2 -->
+  <div class="member-card hidden" id="vehicle2Section">
+    <div class="card-section-label">🚗 Vehicle 2</div>
+    <div class="member-field">
+      <span class="field-label">Make & Model</span>
+      <span class="field-value" id="v2Info">{{contact.vehicle_2_make}} {{contact.vehicle_2_model}}</span>
+    </div>
+    <div class="plate-badge">
+      <span class="plate-label">License Plate</span>
+      <span class="plate-number" id="v2Plate">{{contact.vehicle_2_plate}}</span>
+    </div>
+  </div>
+
+  <!-- VEHICLE 3 -->
+  <div class="member-card hidden" id="vehicle3Section">
+    <div class="card-section-label">🚗 Vehicle 3</div>
+    <div class="member-field">
+      <span class="field-label">Make & Model</span>
+      <span class="field-value" id="v3Info">{{contact.vehicle_3_make}} {{contact.vehicle_3_model}}</span>
+    </div>
+    <div class="plate-badge">
+      <span class="plate-label">License Plate</span>
+      <span class="plate-number" id="v3Plate">{{contact.vehicle_3_plate}}</span>
+    </div>
+  </div>
+
+  <!-- PLAN TILE -->
+  <div class="plan-tile">
+    <div>
+      <div class="plan-name">Unlimited Club</div>
+      <div class="plan-sub">Cancel anytime · No contracts</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.8rem;letter-spacing:1px;color:rgba(255,255,255,0.6);">Active Member</div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>
+    K&R Car Wash · 81729 Hwy 111, Indio CA 92201<br>
+    <a href="tel:7609724030">(760) 972-4030</a> ·
+    <a href="mailto:kandrinc111@gmail.com">kandrinc111@gmail.com</a>
+  </p>
+</footer>
+
+<script>
+  const banner  = document.getElementById('statusBanner');
+  const icon    = document.getElementById('statusIcon');
+  const word    = document.getElementById('statusWord');
+  const tagline = document.getElementById('statusTagline');
+  const pill    = document.getElementById('cardStatusPill');
+
+  const rawStatus = '{{contact.membership_status}}';
+  const status = rawStatus.toLowerCase().trim();
+
+  if (status === 'active') {
+    banner.classList.add('is-active');
+    icon.textContent    = '✅';
+    word.textContent    = 'ACTIVE';
+    tagline.textContent = 'Membership is valid — welcome!';
+    pill.textContent    = 'Active';
+    pill.classList.add('active');
+  } else if (status === 'inactive' || status === 'cancelled') {
+    banner.classList.add('is-inactive');
+    icon.textContent    = '❌';
+    word.textContent    = status === 'cancelled' ? 'CANCELLED' : 'INACTIVE';
+    tagline.textContent = 'Membership is not active — please see staff';
+    pill.textContent    = status === 'cancelled' ? 'Cancelled' : 'Inactive';
+    pill.classList.add('inactive');
+  } else {
+    banner.classList.add('is-unknown');
+    icon.textContent    = '❓';
+    word.textContent    = 'UNKNOWN';
+    tagline.textContent = 'Unable to verify — please see staff';
+    pill.textContent    = 'Unknown';
+    pill.classList.add('unknown');
+  }
+
+  function isBlank(val) {
+    return !val || val.trim() === '' || val.includes('{{');
+  }
+
+  if (!isBlank(document.getElementById('v2Plate').textContent) || !isBlank(document.getElementById('v2Info').textContent)) {
+    document.getElementById('vehicle2Section').classList.remove('hidden');
+  }
+  if (!isBlank(document.getElementById('v3Plate').textContent) || !isBlank(document.getElementById('v3Info').textContent)) {
+    document.getElementById('vehicle3Section').classList.remove('hidden');
+  }
+
+  const memberId = document.getElementById('cardMemberId').textContent.trim();
+  const qrData = isBlank(memberId) ? window.location.href : memberId;
+
+  QRCode.toCanvas(document.getElementById('qrCanvas'), qrData, {
+    width: 200,
+    margin: 2,
+    color: { dark: '#0d2a3e', light: '#ffffff' }
+  });
+
+  function openQR() {
+    document.getElementById('qrOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeQR() {
+    document.getElementById('qrOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function closeQROutside(e) {
+    if (e.target === document.getElementById('qrOverlay')) closeQR();
+  }
+</script>
+
+</body>
+</html>
