@@ -134,7 +134,7 @@ footer a:hover{color:var(--yellow);}
     </div>
 
     <div class="member-card">
-      <div class="card-section-label">&#x1F464; Member Information</div>
+      <div class="card-section-label">Member Information</div>
       <div class="member-field">
         <span class="field-label">Name</span>
         <span class="field-value" id="memberName"></span>
@@ -146,7 +146,7 @@ footer a:hover{color:var(--yellow);}
     </div>
 
     <div class="member-card hidden" id="vehicle1Section">
-      <div class="card-section-label">&#x1F697; Vehicle 1</div>
+      <div class="card-section-label">Vehicle 1</div>
       <div class="member-field">
         <span class="field-label">Make &amp; Model</span>
         <span class="field-value" id="v1Info"></span>
@@ -158,7 +158,7 @@ footer a:hover{color:var(--yellow);}
     </div>
 
     <div class="member-card hidden" id="vehicle2Section">
-      <div class="card-section-label">&#x1F697; Vehicle 2</div>
+      <div class="card-section-label">Vehicle 2</div>
       <div class="member-field">
         <span class="field-label">Make &amp; Model</span>
         <span class="field-value" id="v2Info"></span>
@@ -170,7 +170,7 @@ footer a:hover{color:var(--yellow);}
     </div>
 
     <div class="member-card hidden" id="vehicle3Section">
-      <div class="card-section-label">&#x1F697; Vehicle 3</div>
+      <div class="card-section-label">Vehicle 3</div>
       <div class="member-field">
         <span class="field-label">Make &amp; Model</span>
         <span class="field-value" id="v3Info"></span>
@@ -202,21 +202,20 @@ footer a:hover{color:var(--yellow);}
   </p>
 </footer>
 
+<script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script>
 function isBlank(v) { return !v || v.trim() === ''; }
-
-function loadQRLib(cb) {
-  if (window.QRCode) { cb(); return; }
-  var s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
-  s.onload = cb;
-  s.onerror = cb;
-  document.head.appendChild(s);
-}
 
 function showError() {
   document.getElementById('loadingState').classList.add('hidden');
   document.getElementById('errorState').classList.remove('hidden');
+}
+
+function generateQR(data) {
+  var canvas = document.getElementById('qrCanvas');
+  if (window.QRCode) {
+    QRCode.toCanvas(canvas, data, { width: 200, margin: 2, color: { dark: '#0d2a3e', light: '#ffffff' } });
+  }
 }
 
 function renderMember(d) {
@@ -276,14 +275,7 @@ function renderMember(d) {
   }
 
   var qrData = isBlank(d.memberId) ? window.location.href : d.memberId;
-  loadQRLib(function() {
-    if (window.QRCode) {
-      QRCode.toCanvas(document.getElementById('qrCanvas'), qrData, {
-        width: 200, margin: 2,
-        color: { dark: '#0d2a3e', light: '#ffffff' }
-      });
-    }
-  });
+  generateQR(qrData);
 }
 
 function loadMember() {
