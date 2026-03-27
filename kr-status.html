@@ -5,126 +5,92 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>K&R Car Wash — Membership Status</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet"/>
-
 <style>
-  :root {
-    --blue-dark:  #1a6fa8;
-    --blue-mid:   #2e9fd4;
-    --blue-pale:  #d6eef8;
-    --yellow:     #f5c518;
-    --text-dark:  #0d2a3e;
-    --text-mid:   #2a5470;
-    --white:      #ffffff;
-    --off-white:  #f4faff;
-    --green:      #16a34a;
-    --red:        #dc2626;
-  }
-  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Barlow',sans-serif; background:var(--off-white); color:var(--text-dark); min-height:100vh; display:flex; flex-direction:column; }
-
-  header { background:rgba(26,111,168,0.97); height:60px; display:flex; align-items:center; justify-content:space-between; padding:0 1.2rem; box-shadow:0 2px 20px rgba(0,0,0,0.2); flex-shrink:0; position:relative; }
-  .logo { font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:3px; color:var(--white); position:absolute; left:50%; transform:translateX(-50%); }
-  .logo span { color:var(--yellow); }
-  .qr-btn { margin-left:auto; background:rgba(255,255,255,0.15); border:1.5px solid rgba(255,255,255,0.35); border-radius:10px; width:42px; height:42px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background 0.2s; -webkit-tap-highlight-color:transparent; z-index:1; }
-  .qr-btn:active { background:rgba(255,255,255,0.25); }
-  .qr-btn svg { width:22px; height:22px; }
-
-  .qr-overlay { display:none; position:fixed; inset:0; z-index:200; background:rgba(13,42,62,0.85); align-items:center; justify-content:center; padding:2rem; }
-  .qr-overlay.open { display:flex; animation:fadeIn 0.2s ease both; }
-  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-  .qr-modal { background:var(--white); border-radius:24px; padding:2rem 2rem 1.6rem; display:flex; flex-direction:column; align-items:center; gap:1rem; max-width:320px; width:100%; animation:popIn 0.25s cubic-bezier(0.34,1.56,0.64,1) both; position:relative; }
-  @keyframes popIn { from{opacity:0;transform:scale(0.85)} to{opacity:1;transform:scale(1)} }
-  .qr-modal-close { position:absolute; top:14px; right:14px; background:var(--off-white); border:none; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1rem; color:var(--text-mid); }
-  .qr-modal-title { font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:3px; color:var(--text-dark); }
-  .qr-member-name { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1px; color:var(--blue-dark); text-align:center; }
-  .qr-modal-sub { font-size:0.78rem; color:var(--text-mid); text-align:center; line-height:1.5; }
-  #qrCanvas { border-radius:12px; border:3px solid var(--blue-pale); display:block; }
-
-  main { flex:1; display:flex; flex-direction:column; align-items:center; padding:2.5rem 1.5rem 3rem; gap:1.4rem; max-width:480px; margin:0 auto; width:100%; }
-
-  /* LOADING */
-  .loading-state { text-align:center; padding:3rem 1rem; }
-  .loading-spinner { width:48px; height:48px; border:4px solid var(--blue-pale); border-top-color:var(--blue-mid); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 1.2rem; }
-  @keyframes spin { to{transform:rotate(360deg)} }
-  .loading-text { font-family:'Barlow Condensed',sans-serif; font-size:0.9rem; letter-spacing:2px; text-transform:uppercase; color:var(--text-mid); }
-
-  /* ERROR */
-  .error-state { text-align:center; padding:3rem 1rem; width:100%; }
-  .error-icon { font-size:3rem; margin-bottom:1rem; }
-  .error-text { font-family:'Barlow Condensed',sans-serif; font-size:1rem; letter-spacing:1px; color:var(--text-mid); }
-
-  /* STATUS BANNER */
-  .status-banner { width:100%; border-radius:20px; padding:2.5rem 2rem; text-align:center; position:relative; overflow:hidden; box-shadow:0 8px 40px rgba(0,0,0,0.12); }
-  .status-banner::before { content:''; position:absolute; top:-30px; right:-30px; width:150px; height:150px; background:radial-gradient(circle,rgba(255,255,255,0.12) 0%,transparent 70%); pointer-events:none; }
-  .status-banner.is-active   { background:linear-gradient(145deg,#14532d,#16a34a); }
-  .status-banner.is-inactive { background:linear-gradient(145deg,#7f1d1d,#dc2626); }
-  .status-banner.is-unknown  { background:linear-gradient(145deg,#374151,#6b7280); }
-  .status-icon { font-size:4rem; margin-bottom:0.8rem; display:block; animation:iconPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
-  @keyframes iconPop { from{opacity:0;transform:scale(0.5)} to{opacity:1;transform:scale(1)} }
-  .status-word { font-family:'Bebas Neue',sans-serif; font-size:clamp(3.5rem,16vw,5.5rem); color:var(--white); letter-spacing:6px; line-height:1; text-shadow:0 4px 20px rgba(0,0,0,0.2); animation:fadeUp 0.4s 0.1s ease both; }
-  .status-tagline { font-family:'Barlow Condensed',sans-serif; font-size:0.88rem; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.65); margin-top:0.6rem; animation:fadeUp 0.4s 0.2s ease both; }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-
-  /* MEMBERSHIP CARD */
-  .membership-card { width:100%; background:linear-gradient(135deg,#0d2a3e 0%,#1a6fa8 60%,#2e9fd4 100%); border-radius:20px; padding:1.8rem; box-shadow:0 8px 32px rgba(13,42,62,0.25); animation:fadeUp 0.4s 0.2s ease both; position:relative; overflow:hidden; }
-  .membership-card::before { content:''; position:absolute; top:-40px; right:-40px; width:180px; height:180px; background:radial-gradient(circle,rgba(245,197,24,0.15) 0%,transparent 70%); pointer-events:none; }
-  .card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.4rem; }
-  .card-brand { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:3px; color:var(--white); }
-  .card-brand span { color:var(--yellow); }
-  .card-badge { background:rgba(245,197,24,0.2); border:1px solid rgba(245,197,24,0.5); border-radius:100px; padding:3px 12px; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; color:var(--yellow); }
-  .card-member-name { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; letter-spacing:2px; color:var(--white); margin-bottom:0.2rem; }
-  .card-plan-name { font-family:'Barlow Condensed',sans-serif; font-size:0.78rem; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.5); margin-bottom:1.2rem; }
-  .card-bottom { display:flex; justify-content:space-between; align-items:flex-end; }
-  .card-member-id-label { font-family:'Barlow Condensed',sans-serif; font-size:0.6rem; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.35); margin-bottom:2px; }
-  .card-member-id { font-family:'Barlow Condensed',sans-serif; font-size:0.85rem; letter-spacing:3px; color:rgba(255,255,255,0.7); }
-  .card-status-pill { padding:4px 14px; border-radius:100px; font-family:'Bebas Neue',sans-serif; font-size:0.9rem; letter-spacing:2px; }
-  .card-status-pill.active   { background:var(--green); color:var(--white); }
-  .card-status-pill.inactive { background:var(--red);   color:var(--white); }
-  .card-status-pill.unknown  { background:#6b7280;      color:var(--white); }
-
-  /* INFO CARD */
-  .member-card { width:100%; background:var(--white); border-radius:16px; padding:1.6rem 1.8rem; border:2px solid var(--blue-pale); box-shadow:0 4px 20px rgba(13,42,62,0.07); animation:fadeUp 0.4s 0.25s ease both; }
-  .card-section-label { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:0.68rem; letter-spacing:3px; text-transform:uppercase; color:var(--blue-mid); margin-bottom:1rem; padding-bottom:0.6rem; border-bottom:2px solid var(--blue-pale); }
-  .member-field { display:flex; justify-content:space-between; align-items:center; padding:0.6rem 0; border-bottom:1px solid var(--blue-pale); }
-  .member-field:last-child { border-bottom:none; }
-  .field-label { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:0.75rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-mid); }
-  .field-value { font-size:0.92rem; font-weight:600; color:var(--text-dark); text-align:right; }
-
-  /* PLATE */
-  .plate-badge { width:100%; background:var(--text-dark); border-radius:12px; padding:1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; margin-top:0.8rem; }
-  .plate-label { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:0.68rem; letter-spacing:3px; text-transform:uppercase; color:rgba(255,255,255,0.4); }
-  .plate-number { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:5px; color:var(--yellow); }
-
-  /* PLAN */
-  .plan-tile { width:100%; background:linear-gradient(135deg,#0d2a3e,#1a6fa8); border-radius:14px; padding:1.2rem 1.6rem; display:flex; align-items:center; justify-content:space-between; animation:fadeUp 0.4s 0.35s ease both; }
-  .plan-name { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1px; color:var(--white); }
-  .plan-sub { font-size:0.78rem; color:rgba(255,255,255,0.5); margin-top:2px; }
-
-  .hidden { display:none !important; }
-
-  footer { background:var(--text-dark); padding:1.2rem; text-align:center; flex-shrink:0; }
-  footer p { font-size:0.75rem; color:rgba(255,255,255,0.3); line-height:1.6; }
-  footer a { color:rgba(255,255,255,0.45); text-decoration:none; }
-  footer a:hover { color:var(--yellow); }
+:root {
+  --blue-dark:#1a6fa8;--blue-mid:#2e9fd4;--blue-pale:#d6eef8;--yellow:#f5c518;
+  --text-dark:#0d2a3e;--text-mid:#2a5470;--white:#ffffff;--off-white:#f4faff;
+  --green:#16a34a;--red:#dc2626;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Barlow',sans-serif;background:var(--off-white);color:var(--text-dark);min-height:100vh;display:flex;flex-direction:column;}
+header{background:rgba(26,111,168,0.97);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 1.2rem;box-shadow:0 2px 20px rgba(0,0,0,0.2);flex-shrink:0;position:relative;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:3px;color:var(--white);position:absolute;left:50%;transform:translateX(-50%);}
+.logo span{color:var(--yellow);}
+.qr-btn{margin-left:auto;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.35);border-radius:10px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1;}
+.qr-btn svg{width:22px;height:22px;}
+.qr-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(13,42,62,0.85);align-items:center;justify-content:center;padding:2rem;}
+.qr-overlay.open{display:flex;}
+.qr-modal{background:var(--white);border-radius:24px;padding:2rem 2rem 1.6rem;display:flex;flex-direction:column;align-items:center;gap:1rem;max-width:320px;width:100%;position:relative;}
+.qr-modal-close{position:absolute;top:14px;right:14px;background:var(--off-white);border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;color:var(--text-mid);}
+.qr-modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:var(--text-dark);}
+.qr-member-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:1px;color:var(--blue-dark);text-align:center;}
+.qr-modal-sub{font-size:0.78rem;color:var(--text-mid);text-align:center;line-height:1.5;}
+#qrCanvas{border-radius:12px;border:3px solid var(--blue-pale);display:block;}
+main{flex:1;display:flex;flex-direction:column;align-items:center;padding:2.5rem 1.5rem 3rem;gap:1.4rem;max-width:480px;margin:0 auto;width:100%;}
+.loading-state{text-align:center;padding:3rem 1rem;width:100%;}
+.loading-spinner{width:48px;height:48px;border:4px solid var(--blue-pale);border-top-color:var(--blue-mid);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1.2rem;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-family:'Barlow Condensed',sans-serif;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-mid);}
+.error-state{text-align:center;padding:3rem 1rem;width:100%;}
+.error-icon{font-size:3rem;margin-bottom:1rem;}
+.error-text{font-family:'Barlow Condensed',sans-serif;font-size:1rem;letter-spacing:1px;color:var(--text-mid);}
+.status-banner{width:100%;border-radius:20px;padding:2.5rem 2rem;text-align:center;position:relative;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.12);}
+.status-banner.is-active{background:linear-gradient(145deg,#14532d,#16a34a);}
+.status-banner.is-inactive{background:linear-gradient(145deg,#7f1d1d,#dc2626);}
+.status-banner.is-unknown{background:linear-gradient(145deg,#374151,#6b7280);}
+.status-icon{font-size:4rem;margin-bottom:0.8rem;display:block;}
+.status-word{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,16vw,5.5rem);color:var(--white);letter-spacing:6px;line-height:1;}
+.status-tagline{font-family:'Barlow Condensed',sans-serif;font-size:0.88rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.65);margin-top:0.6rem;}
+.membership-card{width:100%;background:linear-gradient(135deg,#0d2a3e 0%,#1a6fa8 60%,#2e9fd4 100%);border-radius:20px;padding:1.8rem;box-shadow:0 8px 32px rgba(13,42,62,0.25);}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.4rem;}
+.card-brand{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;color:var(--white);}
+.card-brand span{color:var(--yellow);}
+.card-badge{background:rgba(245,197,24,0.2);border:1px solid rgba(245,197,24,0.5);border-radius:100px;padding:3px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--yellow);}
+.card-member-name{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:2px;color:var(--white);margin-bottom:0.2rem;}
+.card-plan-name{font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:1.2rem;}
+.card-bottom{display:flex;justify-content:space-between;align-items:flex-end;}
+.card-member-id-label{font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:2px;}
+.card-member-id{font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;letter-spacing:3px;color:rgba(255,255,255,0.7);}
+.card-status-pill{padding:4px 14px;border-radius:100px;font-family:'Bebas Neue',sans-serif;font-size:0.9rem;letter-spacing:2px;}
+.card-status-pill.active{background:var(--green);color:var(--white);}
+.card-status-pill.inactive{background:var(--red);color:var(--white);}
+.card-status-pill.unknown{background:#6b7280;color:var(--white);}
+.member-card{width:100%;background:var(--white);border-radius:16px;padding:1.6rem 1.8rem;border:2px solid var(--blue-pale);box-shadow:0 4px 20px rgba(13,42,62,0.07);}
+.card-section-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.68rem;letter-spacing:3px;text-transform:uppercase;color:var(--blue-mid);margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:2px solid var(--blue-pale);}
+.member-field{display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--blue-pale);}
+.member-field:last-child{border-bottom:none;}
+.field-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-mid);}
+.field-value{font-size:0.92rem;font-weight:600;color:var(--text-dark);text-align:right;}
+.plate-badge{width:100%;background:var(--text-dark);border-radius:12px;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;margin-top:0.8rem;}
+.plate-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.68rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.4);}
+.plate-number{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:5px;color:var(--yellow);}
+.plan-tile{width:100%;background:linear-gradient(135deg,#0d2a3e,#1a6fa8);border-radius:14px;padding:1.2rem 1.6rem;display:flex;align-items:center;justify-content:space-between;}
+.plan-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:1px;color:var(--white);}
+.plan-sub{font-size:0.78rem;color:rgba(255,255,255,0.5);margin-top:2px;}
+.hidden{display:none!important;}
+footer{background:var(--text-dark);padding:1.2rem;text-align:center;flex-shrink:0;}
+footer p{font-size:0.75rem;color:rgba(255,255,255,0.3);line-height:1.6;}
+footer a{color:rgba(255,255,255,0.45);text-decoration:none;}
+footer a:hover{color:var(--yellow);}
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">K<span>&</span>R Car Wash</div>
-  <button class="qr-btn" onclick="openQR()" aria-label="Show QR Code">
+  <button class="qr-btn" id="qrBtnHeader" aria-label="Show QR Code">
     <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+      <rect x="3" y="3" width="7" height="7" rx="1"/>
+      <rect x="14" y="3" width="7" height="7" rx="1"/>
       <rect x="3" y="14" width="7" height="7" rx="1"/>
       <path d="M14 14h2v2h-2zM18 14h3M14 18v3M18 18h3v3h-3z"/>
     </svg>
   </button>
 </header>
 
-<!-- QR MODAL -->
-<div class="qr-overlay" id="qrOverlay" onclick="closeQROutside(event)">
+<div class="qr-overlay" id="qrOverlay">
   <div class="qr-modal">
-    <button class="qr-modal-close" onclick="closeQR()">✕</button>
+    <button class="qr-modal-close" id="qrClose">&#x2715;</button>
     <div class="qr-modal-title">My Membership</div>
     <div class="qr-member-name" id="qrName"></div>
     <canvas id="qrCanvas"></canvas>
@@ -132,29 +98,26 @@
   </div>
 </div>
 
-<main id="mainContent">
-  <!-- LOADING STATE -->
+<main>
   <div class="loading-state" id="loadingState">
     <div class="loading-spinner"></div>
     <div class="loading-text">Loading your membership...</div>
   </div>
 
-  <!-- ERROR STATE -->
   <div class="error-state hidden" id="errorState">
-    <div class="error-icon">❌</div>
-    <div class="error-text">Membership not found.<br>Please contact K&R Car Wash.</div>
+    <div class="error-icon">&#x274C;</div>
+    <div class="error-text">Membership not found.<br>Please contact K&amp;R Car Wash.</div>
   </div>
 
-  <!-- CONTENT (hidden until loaded) -->
-  <div class="hidden" id="memberContent">
+  <div id="memberContent" class="hidden" style="width:100%;display:flex;flex-direction:column;gap:1.4rem;">
 
-    <div class="status-banner" id="statusBanner" style="width:100%">
+    <div class="status-banner" id="statusBanner">
       <span class="status-icon" id="statusIcon"></span>
       <div class="status-word" id="statusWord"></div>
       <div class="status-tagline" id="statusTagline"></div>
     </div>
 
-    <div class="membership-card" style="width:100%;margin-top:1.4rem;">
+    <div class="membership-card">
       <div class="card-top">
         <div class="card-brand">K<span>&</span>R Car Wash</div>
         <div class="card-badge">Unlimited Club</div>
@@ -170,8 +133,8 @@
       </div>
     </div>
 
-    <div class="member-card" style="width:100%;margin-top:1.4rem;">
-      <div class="card-section-label">👤 Member Information</div>
+    <div class="member-card">
+      <div class="card-section-label">&#x1F464; Member Information</div>
       <div class="member-field">
         <span class="field-label">Name</span>
         <span class="field-value" id="memberName"></span>
@@ -182,10 +145,10 @@
       </div>
     </div>
 
-    <div class="member-card hidden" id="vehicle1Section" style="width:100%;margin-top:1.4rem;">
-      <div class="card-section-label">🚗 Vehicle 1</div>
+    <div class="member-card hidden" id="vehicle1Section">
+      <div class="card-section-label">&#x1F697; Vehicle 1</div>
       <div class="member-field">
-        <span class="field-label">Make & Model</span>
+        <span class="field-label">Make &amp; Model</span>
         <span class="field-value" id="v1Info"></span>
       </div>
       <div class="plate-badge">
@@ -194,10 +157,10 @@
       </div>
     </div>
 
-    <div class="member-card hidden" id="vehicle2Section" style="width:100%;margin-top:1.4rem;">
-      <div class="card-section-label">🚗 Vehicle 2</div>
+    <div class="member-card hidden" id="vehicle2Section">
+      <div class="card-section-label">&#x1F697; Vehicle 2</div>
       <div class="member-field">
-        <span class="field-label">Make & Model</span>
+        <span class="field-label">Make &amp; Model</span>
         <span class="field-value" id="v2Info"></span>
       </div>
       <div class="plate-badge">
@@ -206,10 +169,10 @@
       </div>
     </div>
 
-    <div class="member-card hidden" id="vehicle3Section" style="width:100%;margin-top:1.4rem;">
-      <div class="card-section-label">🚗 Vehicle 3</div>
+    <div class="member-card hidden" id="vehicle3Section">
+      <div class="card-section-label">&#x1F697; Vehicle 3</div>
       <div class="member-field">
-        <span class="field-label">Make & Model</span>
+        <span class="field-label">Make &amp; Model</span>
         <span class="field-value" id="v3Info"></span>
       </div>
       <div class="plate-badge">
@@ -218,10 +181,10 @@
       </div>
     </div>
 
-    <div class="plan-tile" style="width:100%;margin-top:1.4rem;">
+    <div class="plan-tile">
       <div>
         <div class="plan-name">Unlimited Club</div>
-        <div class="plan-sub">Cancel anytime · No contracts</div>
+        <div class="plan-sub">Cancel anytime &middot; No contracts</div>
       </div>
       <div style="text-align:right;">
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.8rem;letter-spacing:1px;color:rgba(255,255,255,0.6);">Active Member</div>
@@ -233,40 +196,27 @@
 
 <footer>
   <p>
-    K&R Car Wash · 81729 Hwy 111, Indio CA 92201<br>
-    <a href="tel:7609724030">(760) 972-4030</a> ·
-    <a href="/cdn-cgi/l/email-protection#a9c2c8c7cddbc0c7ca989898e9cec4c8c0c587cac6c4"><span class="__cf_email__" data-cfemail="462d272822342f282577777706212b272f2a6825292b">[email&#160;protected]</span></a>
+    K&amp;R Car Wash &middot; 81729 Hwy 111, Indio CA 92201<br>
+    <a href="tel:7609724030">(760) 972-4030</a> &middot;
+    <a href="mailto:kandrinc111@gmail.com">kandrinc111@gmail.com</a>
   </p>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-var memberData = null;
+<script>
+function isBlank(v) { return !v || v.trim() === ''; }
 
-function isBlank(val) { return !val || val.trim() === ''; }
-
-function loadQRLibrary() {
-  return new Promise(function(resolve) {
-    if (window.QRCode) { resolve(); return; }
-    var s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
-    s.onload = resolve;
-    s.onerror = resolve;
-    document.head.appendChild(s);
-  });
+function loadQRLib(cb) {
+  if (window.QRCode) { cb(); return; }
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+  s.onload = cb;
+  s.onerror = cb;
+  document.head.appendChild(s);
 }
 
-async function loadMember() {
-  var params = new URLSearchParams(window.location.search);
-  var contactId = params.get('id');
-  if (!contactId) { showError(); return; }
-  try {
-    var res = await fetch('/.netlify/functions/get-member?id=' + encodeURIComponent(contactId));
-    var data = await res.json();
-    if (!data.found) { showError(); return; }
-    memberData = data;
-    await loadQRLibrary();
-    renderMember(data);
-  } catch (err) { showError(); }
+function showError() {
+  document.getElementById('loadingState').classList.add('hidden');
+  document.getElementById('errorState').classList.remove('hidden');
 }
 
 function renderMember(d) {
@@ -275,65 +225,97 @@ function renderMember(d) {
 
   var status = (d.status || '').toLowerCase().trim();
   var banner = document.getElementById('statusBanner');
-  var icon   = document.getElementById('statusIcon');
-  var word   = document.getElementById('statusWord');
-  var tag    = document.getElementById('statusTagline');
-  var pill   = document.getElementById('cardStatusPill');
+  var icon = document.getElementById('statusIcon');
+  var word = document.getElementById('statusWord');
+  var tag = document.getElementById('statusTagline');
+  var pill = document.getElementById('cardStatusPill');
 
   if (status === 'active') {
     banner.classList.add('is-active');
-    icon.textContent = '✅'; word.textContent = 'ACTIVE';
-    tag.textContent = 'Membership is valid — welcome!';
-    pill.textContent = 'Active'; pill.classList.add('active');
+    icon.textContent = '\u2705';
+    word.textContent = 'ACTIVE';
+    tag.textContent = 'Membership is valid \u2014 welcome!';
+    pill.textContent = 'Active';
+    pill.classList.add('active');
   } else if (status === 'inactive' || status === 'cancelled') {
     banner.classList.add('is-inactive');
-    icon.textContent = '❌'; word.textContent = status === 'cancelled' ? 'CANCELLED' : 'INACTIVE';
-    tag.textContent = 'Membership is not active — please see staff';
-    pill.textContent = status === 'cancelled' ? 'Cancelled' : 'Inactive'; pill.classList.add('inactive');
+    icon.textContent = '\u274C';
+    word.textContent = status === 'cancelled' ? 'CANCELLED' : 'INACTIVE';
+    tag.textContent = 'Membership is not active \u2014 please see staff';
+    pill.textContent = status === 'cancelled' ? 'Cancelled' : 'Inactive';
+    pill.classList.add('inactive');
   } else {
     banner.classList.add('is-unknown');
-    icon.textContent = '❓'; word.textContent = 'UNKNOWN';
-    tag.textContent = 'Unable to verify — please see staff';
-    pill.textContent = 'Unknown'; pill.classList.add('unknown');
+    icon.textContent = '\u2753';
+    word.textContent = 'UNKNOWN';
+    tag.textContent = 'Unable to verify \u2014 please see staff';
+    pill.textContent = 'Unknown';
+    pill.classList.add('unknown');
   }
 
-  document.getElementById('cardName').textContent     = d.name;
-  document.getElementById('cardMemberId').textContent = d.memberId || '—';
-  document.getElementById('memberName').textContent   = d.name;
-  document.getElementById('memberPhone').textContent  = d.phone || '—';
-  document.getElementById('qrName').textContent       = d.name;
+  document.getElementById('cardName').textContent = d.name;
+  document.getElementById('cardMemberId').textContent = d.memberId || '\u2014';
+  document.getElementById('memberName').textContent = d.name;
+  document.getElementById('memberPhone').textContent = d.phone || '\u2014';
+  document.getElementById('qrName').textContent = d.name;
 
   if (!isBlank(d.vehicle1.make) || !isBlank(d.vehicle1.plate)) {
     document.getElementById('vehicle1Section').classList.remove('hidden');
-    document.getElementById('v1Info').textContent  = (d.vehicle1.make + ' ' + d.vehicle1.model).trim() || '—';
-    document.getElementById('v1Plate').textContent = d.vehicle1.plate || '—';
+    document.getElementById('v1Info').textContent = (d.vehicle1.make + ' ' + d.vehicle1.model).trim();
+    document.getElementById('v1Plate').textContent = d.vehicle1.plate;
   }
   if (!isBlank(d.vehicle2.make) || !isBlank(d.vehicle2.plate)) {
     document.getElementById('vehicle2Section').classList.remove('hidden');
-    document.getElementById('v2Info').textContent  = (d.vehicle2.make + ' ' + d.vehicle2.model).trim() || '—';
-    document.getElementById('v2Plate').textContent = d.vehicle2.plate || '—';
+    document.getElementById('v2Info').textContent = (d.vehicle2.make + ' ' + d.vehicle2.model).trim();
+    document.getElementById('v2Plate').textContent = d.vehicle2.plate;
   }
   if (!isBlank(d.vehicle3.make) || !isBlank(d.vehicle3.plate)) {
     document.getElementById('vehicle3Section').classList.remove('hidden');
-    document.getElementById('v3Info').textContent  = (d.vehicle3.make + ' ' + d.vehicle3.model).trim() || '—';
-    document.getElementById('v3Plate').textContent = d.vehicle3.plate || '—';
+    document.getElementById('v3Info').textContent = (d.vehicle3.make + ' ' + d.vehicle3.model).trim();
+    document.getElementById('v3Plate').textContent = d.vehicle3.plate;
   }
 
   var qrData = isBlank(d.memberId) ? window.location.href : d.memberId;
-  QRCode.toCanvas(document.getElementById('qrCanvas'), qrData, {
-    width: 200, margin: 2,
-    color: { dark: '#0d2a3e', light: '#ffffff' }
+  loadQRLib(function() {
+    if (window.QRCode) {
+      QRCode.toCanvas(document.getElementById('qrCanvas'), qrData, {
+        width: 200, margin: 2,
+        color: { dark: '#0d2a3e', light: '#ffffff' }
+      });
+    }
   });
 }
 
-function showError() {
-  document.getElementById('loadingState').classList.add('hidden');
-  document.getElementById('errorState').classList.remove('hidden');
+function loadMember() {
+  var params = new URLSearchParams(window.location.search);
+  var contactId = params.get('id');
+  if (!contactId) { showError(); return; }
+  fetch('/.netlify/functions/get-member?id=' + encodeURIComponent(contactId))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.found) { showError(); return; }
+      renderMember(data);
+    })
+    .catch(function() { showError(); });
 }
 
-function openQR() {
+document.getElementById('qrBtnHeader').addEventListener('click', function() {
   document.getElementById('qrOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
-}
+});
+document.getElementById('qrClose').addEventListener('click', function() {
+  document.getElementById('qrOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+});
+document.getElementById('qrOverlay').addEventListener('click', function(e) {
+  if (e.target === this) {
+    this.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
 
-function closeQR() {
+loadMember();
+</script>
+
+</body>
+</html>
