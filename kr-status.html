@@ -25,7 +25,7 @@ header{background:rgba(26,111,168,0.97);height:60px;display:flex;align-items:cen
 .qr-modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:var(--text-dark);}
 .qr-member-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:1px;color:var(--blue-dark);text-align:center;}
 .qr-modal-sub{font-size:0.78rem;color:var(--text-mid);text-align:center;line-height:1.5;}
-#qrCanvas{border-radius:12px;border:3px solid var(--blue-pale);display:block;}
+#qrImage{border-radius:12px;border:3px solid var(--blue-pale);display:block;width:200px;height:200px;}
 main{flex:1;display:flex;flex-direction:column;align-items:center;padding:2.5rem 1.5rem 3rem;gap:1.4rem;max-width:480px;margin:0 auto;width:100%;}
 .loading-state{text-align:center;padding:3rem 1rem;width:100%;}
 .loading-spinner{width:48px;height:48px;border:4px solid var(--blue-pale);border-top-color:var(--blue-mid);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1.2rem;}
@@ -93,7 +93,7 @@ footer a:hover{color:var(--yellow);}
     <button class="qr-modal-close" id="qrClose">&#x2715;</button>
     <div class="qr-modal-title">My Membership</div>
     <div class="qr-member-name" id="qrName"></div>
-    <canvas id="qrCanvas"></canvas>
+    <img id="qrImage" alt="QR Code"/>
     <p class="qr-modal-sub">Show this to staff or let them search your license plate.</p>
   </div>
 </div>
@@ -202,7 +202,6 @@ footer a:hover{color:var(--yellow);}
   </p>
 </footer>
 
-<script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script>
 function isBlank(v) { return !v || v.trim() === ''; }
 
@@ -212,10 +211,8 @@ function showError() {
 }
 
 function generateQR(data) {
-  var canvas = document.getElementById('qrCanvas');
-  if (window.QRCode) {
-    QRCode.toCanvas(canvas, data, { width: 200, margin: 2, color: { dark: '#0d2a3e', light: '#ffffff' } });
-  }
+  var img = document.getElementById('qrImage');
+  img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(data) + '&color=0d2a3e&bgcolor=ffffff';
 }
 
 function renderMember(d) {
