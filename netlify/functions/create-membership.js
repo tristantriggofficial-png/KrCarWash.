@@ -1,10 +1,10 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-const GHL_API_KEY    = process.env.GHL_API_KEY;
-const GHL_LOCATION   = process.env.GHL_LOCATION_ID;
+const GHL_API_KEY  = process.env.GHL_API_KEY;
+const GHL_LOCATION = process.env.GHL_LOCATION_ID;
 
-const PRICE_MAIN     = 'price_1TEzTgE552TsCUvBnY48S7Ha';
-const PRICE_EXTRA    = 'price_1PMbLPE552TsCUvBCoeutYth';
+const PRICE_MAIN  = 'price_1TEzTgE552TsCUvBnY48S7Ha';
+const PRICE_EXTRA = 'price_1PMbLPE552TsCUvBCoeutYth';
 
 exports.handler = async (event) => {
   const headers = {
@@ -13,32 +13,14 @@ exports.handler = async (event) => {
     'Content-Type': 'application/json'
   };
 
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
-  }
-
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
+  if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
 
   let body;
-  try {
-    body = JSON.parse(event.body);
-  } catch {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid request body' }) };
-  }
+  try { body = JSON.parse(event.body); }
+  catch { return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid request body' }) }; }
 
-  const {
-    paymentMethodId,
-    firstName,
-    lastName,
-    email,
-    phone,
-    vehicleMake,
-    vehicleModel,
-    licensePlate,
-    extraVehicles = []
-  } = body;
+  const { paymentMethodId, firstName, lastName, email, phone, vehicleMake, vehicleModel, licensePlate, extraVehicles = [] } = body;
 
   if (!paymentMethodId || !firstName || !lastName || !email || !phone || !vehicleMake || !vehicleModel || !licensePlate) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing required fields' }) };
@@ -59,7 +41,7 @@ exports.handler = async (event) => {
       }
     });
 
-    // 2. Build subscription items — main + extra vehicles
+    // 2. Build subscription items
     const items = [{ price: PRICE_MAIN }];
     extraVehicles.forEach(() => items.push({ price: PRICE_EXTRA }));
 
@@ -91,16 +73,30 @@ exports.handler = async (event) => {
     }
 
     if (subscription.status !== 'active' && subscription.status !== 'trialing') {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: 'Payment failed. Please check your card details.' })
-      };
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Payment failed. Please check your card details.' }) };
     }
 
-    // 4. Create GHL contact
-    const allPlates = [licensePlate, ...extraVehicles.map(v => v.plate)].join(', ');
+    // 4. Build GHL custom fields — primary + up to 2 extra vehicles
+    const customField = {
+      membership_status: 'Active',
+      vehicle_make:  vehicleMake,
+      vehicle_model: vehicleModel,
+      license_plate: licensePlate,
+      member_id:     customer.id
+    };
 
+    if (extraVehicles[0]) {
+      customField.vehicle_2_make  = extraVehicles[0].make  || '';
+      customField.vehicle_2_model = extraVehicles[0].model || '';
+      customField.vehicle_2_plate = extraVehicles[0].plate || '';
+    }
+    if (extraVehicles[1]) {
+      customField.vehicle_3_make  = extraVehicles[1].make  || '';
+      customField.vehicle_3_model = extraVehicles[1].model || '';
+      customField.vehicle_3_plate = extraVehicles[1].plate || '';
+    }
+
+    // 5. Create GHL contact
     const ghlRes = await fetch('https://rest.gohighlevel.com/v1/contacts/', {
       method: 'POST',
       headers: {
@@ -113,13 +109,7 @@ exports.handler = async (event) => {
         lastName,
         email,
         phone,
-        customField: {
-          membership_status: 'Active',
-          license_plate: allPlates,
-          vehicle_make: vehicleMake,
-          vehicle_model: vehicleModel,
-          member_id: customer.id
-        },
+        customField,
         tags: ['active-member', 'unlimited-club']
       })
     });
@@ -135,7 +125,7 @@ exports.handler = async (event) => {
         customerId: customer.id,
         subscriptionId: subscription.id,
         contactId,
-        statusUrl: `https://krcarwash.com/status?contact_id=${contactId}`
+        statusUrl: `https://krcarwash.com/kr-status?id=${contactId}`
       })
     };
 
