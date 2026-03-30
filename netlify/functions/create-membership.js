@@ -2,6 +2,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const GHL_API_KEY  = process.env.GHL_API_KEY;
 const GHL_LOCATION = process.env.GHL_LOCATION_ID;
+const GHL_WEBHOOK  = 'https://services.leadconnectorhq.com/hooks/JavTzRLeF0lXtXbtz1oI/webhook-trigger/ec980ab9-7079-4b48-a531-07256335a30b';
 
 const PRICE_MAIN  = 'price_1TEzTgE552TsCUvBnY48S7Ha';
 const PRICE_EXTRA = 'price_1PMbLPE552TsCUvBCoeutYth';
@@ -76,7 +77,7 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Payment failed. Please check your card details.' }) };
     }
 
-    // 4. Build GHL custom fields — primary + up to 2 extra vehicles
+    // 4. Build GHL custom fields
     const customField = {
       membership_status: 'Active',
       vehicle_make:  vehicleMake,
@@ -116,6 +117,25 @@ exports.handler = async (event) => {
 
     const ghlData = await ghlRes.json();
     const contactId = ghlData.contact?.id || customer.id;
+
+    // 6. Fire GHL workflow webhook
+    await fetch(GHL_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        email,
+        phone,
+        contactId,
+        memberId:      customer.id,
+        statusUrl:     `https://krcarwash.com/kr-status?id=${contactId}`,
+        vehicleMake,
+        vehicleModel,
+        licensePlate,
+        membershipStatus: 'Active'
+      })
+    });
 
     return {
       statusCode: 200,
