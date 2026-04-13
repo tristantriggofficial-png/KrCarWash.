@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -445,23 +444,57 @@ main {
 let scanner = null;
 let recentScans = [];
 
-async function lookupMember(query) {
-  query = query.trim().toUpperCase().replace(/\s/g, '');
+// FIX: Handle both QR scans (full URL with ?id=) and plate searches separately
+async function lookupByContactId(contactId) {
   try {
-    const res = await fetch(`/.netlify/functions/lookup-member?plate=${query}`);
-    const data = await res.json();
-    if (!data.found) return null;
-    return data;
+    var res = await fetch('/.netlify/functions/lookup-member?contact=' + encodeURIComponent(contactId));
+    var data = await res.json();
+    return data.found ? data : null;
   } catch (err) {
     console.error('Lookup error:', err);
     return null;
   }
 }
 
+async function lookupByPlate(plate) {
+  plate = plate.trim().toUpperCase().replace(/\s/g, '');
+  try {
+    var res = await fetch('/.netlify/functions/lookup-member?plate=' + encodeURIComponent(plate));
+    var data = await res.json();
+    return data.found ? data : null;
+  } catch (err) {
+    console.error('Lookup error:', err);
+    return null;
+  }
+}
+
+// FIX: When QR is scanned, extract the contact ID from the URL instead of using raw text
+async function handleQRScan(decodedText) {
+  stopScanner();
+  var member = null;
+
+  try {
+    // Try to parse as a URL and extract the ?id= param
+    var url = new URL(decodedText);
+    var contactId = url.searchParams.get('id');
+    if (contactId) {
+      member = await lookupByContactId(contactId);
+    } else {
+      // Fallback: treat as plate
+      member = await lookupByPlate(decodedText);
+    }
+  } catch (e) {
+    // Not a URL — treat as plate or member ID
+    member = await lookupByPlate(decodedText);
+  }
+
+  showResult(member, decodedText);
+}
+
 async function showResult(member, query) {
-  const overlay = document.getElementById('resultOverlay');
-  const isActive = member && member.status.toLowerCase() === 'active';
-  const notFound = !member;
+  var overlay = document.getElementById('resultOverlay');
+  var isActive = member && member.status.toLowerCase() === 'active';
+  var notFound = !member;
 
   overlay.className = 'active ' + (notFound ? 'active-red' : isActive ? 'active-green' : 'active-red');
 
@@ -470,7 +503,7 @@ async function showResult(member, query) {
   document.getElementById('resultName').textContent = notFound ? 'No membership found' : member.name;
 
   if (!notFound) {
-    const vehicles = [member.vehicle1, member.vehicle2, member.vehicle3].filter(v => v && v.trim().length > 0);
+    var vehicles = [member.vehicle1, member.vehicle2, member.vehicle3].filter(function(v) { return v && v.trim().length > 0; });
     document.getElementById('resultVehicle').textContent = vehicles.join(' · ');
   } else {
     document.getElementById('resultVehicle').textContent = '';
@@ -493,28 +526,22 @@ async function showResult(member, query) {
 }
 
 function dismissResult() {
-  const overlay = document.getElementById('resultOverlay');
+  var overlay = document.getElementById('resultOverlay');
   overlay.className = '';
   overlay.style.display = 'none';
 }
 
 function renderRecent() {
-  const wrap = document.getElementById('recentWrap');
-  const list = document.getElementById('recentList');
+  var wrap = document.getElementById('recentWrap');
+  var list = document.getElementById('recentList');
   if (recentScans.length === 0) { wrap.style.display = 'none'; return; }
   wrap.style.display = 'block';
-  list.innerHTML = recentScans.map(s => `
-    <div class="recent-item ${s.status.toLowerCase() === 'active' ? 'green' : 'red'}">
-      <div>
-        <div class="recent-name">${s.name}</div>
-        <div class="recent-plate">${s.plate}</div>
-      </div>
-      <div style="text-align:right;">
-        <div class="recent-status ${s.status.toLowerCase() === 'active' ? 'green' : 'red'}">${s.status.toUpperCase()}</div>
-        <div class="recent-time">${s.time}</div>
-      </div>
-    </div>
-  `).join('');
+  list.innerHTML = recentScans.map(function(s) {
+    return '<div class="recent-item ' + (s.status.toLowerCase() === 'active' ? 'green' : 'red') + '">' +
+      '<div><div class="recent-name">' + s.name + '</div><div class="recent-plate">' + s.plate + '</div></div>' +
+      '<div style="text-align:right;"><div class="recent-status ' + (s.status.toLowerCase() === 'active' ? 'green' : 'red') + '">' + s.status.toUpperCase() + '</div>' +
+      '<div class="recent-time">' + s.time + '</div></div></div>';
+  }).join('');
 }
 
 function startScanner() {
@@ -524,13 +551,11 @@ function startScanner() {
   scanner.start(
     { facingMode: 'environment' },
     { fps: 10, qrbox: { width: 250, height: 250 } },
-    async (decodedText) => {
-      stopScanner();
-      const member = await lookupMember(decodedText);
-      showResult(member, decodedText);
+    function(decodedText) {
+      handleQRScan(decodedText);
     },
-    () => {}
-  ).catch(err => {
+    function() {}
+  ).catch(function(err) {
     console.error('Camera error:', err);
     stopScanner();
     alert('Camera not available. Please allow camera access and try again.');
@@ -538,15 +563,15 @@ function startScanner() {
 }
 
 function stopScanner() {
-  if (scanner) { scanner.stop().catch(() => {}); scanner = null; }
+  if (scanner) { scanner.stop().catch(function() {}); scanner = null; }
   document.getElementById('scannerState').style.display = 'none';
   document.getElementById('idleState').style.display = 'flex';
 }
 
 async function searchPlate() {
-  const val = document.getElementById('plateInput').value.trim();
+  var val = document.getElementById('plateInput').value.trim();
   if (!val) return;
-  const member = await lookupMember(val);
+  var member = await lookupByPlate(val);
   showResult(member, val);
   document.getElementById('plateInput').value = '';
 }
