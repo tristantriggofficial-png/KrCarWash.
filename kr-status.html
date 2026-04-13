@@ -271,7 +271,9 @@ function renderMember(d) {
     document.getElementById('v3Plate').textContent = d.vehicle3.plate;
   }
 
-  var qrData = isBlank(d.memberId) ? window.location.href : d.memberId;
+  // FIX: Always encode the full status page URL so scanning opens the membership page
+  var contactId = new URLSearchParams(window.location.search).get('id');
+  var qrData = 'https://krcarwash.com/kr-status?id=' + contactId;
   generateQR(qrData);
 }
 
