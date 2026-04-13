@@ -8,7 +8,7 @@ exports.handler = async function(event) {
   }
 
   try {
-    // FIX #1: Fetch contact directly by ID — not a list of 100
+    // Fetch contact directly by ID instead of searching through a list of 100
     var response = await fetch('https://services.leadconnectorhq.com/contacts/' + contactId, {
       headers: {
         'Authorization': 'Bearer ' + apiKey,
@@ -17,7 +17,7 @@ exports.handler = async function(event) {
     });
 
     var data = await response.json();
-    var contact = data.contact || data; // GHL v1 wraps in { contact: {} }
+    var contact = data.contact || data; // GHL v1 wraps response in { contact: {} }
 
     if (!contact || !contact.id) {
       return { statusCode: 200, body: JSON.stringify({ found: false, reason: 'contact not found' }) };
@@ -42,12 +42,13 @@ exports.handler = async function(event) {
       return Array.isArray(f.value) ? f.value[0] : (f.value || '');
     }
 
-    // FIX #2: Check tags (matches what create-membership actually sets)
+    // Check tags — matches what create-membership actually sets ('active-member')
     var tags = contact.tags || [];
     var status = tags.includes('active-member') ? 'active' : 'inactive';
 
     return {
       statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         found: true,
         name: (contact.firstName || '') + ' ' + (contact.lastName || ''),
