@@ -1,7 +1,7 @@
 exports.handler = async function(event) {
   var params = event.queryStringParameters || {};
-  var plate   = (params.plate || '').toUpperCase().replace(/\s/g, '');
-  var contact = (params.contact || '').trim();
+  var plate    = (params.plate || '').toUpperCase().replace(/\s/g, '');
+  var contact  = (params.contact || '').trim();
   var apiKey    = process.env.GHL_API_KEY;
   var locationId = process.env.GHL_LOCATION_ID;
 
@@ -42,7 +42,7 @@ exports.handler = async function(event) {
   }
 
   try {
-    // FIX: If we have a contact ID (from QR scan), fetch directly
+    // QR scan — fetch contact directly by ID
     if (contact) {
       var res = await fetch('https://services.leadconnectorhq.com/contacts/' + contact, {
         headers: { 'Authorization': 'Bearer ' + apiKey, 'Version': '2021-07-28' }
@@ -53,22 +53,39 @@ exports.handler = async function(event) {
       return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formatResult(c)) };
     }
 
-    // Plate search — use GHL search endpoint instead of fetching all contacts
     if (!plate) return { statusCode: 400, body: JSON.stringify({ error: 'No query provided' }) };
 
-    var searchRes = await fetch('https://services.leadconnectorhq.com/contacts/?locationId=' + locationId + '&query=' + encodeURIComponent(plate) + '&limit=20', {
-      headers: { 'Authorization': 'Bearer ' + apiKey, 'Version': '2021-07-28' }
-    });
-    var searchData = await searchRes.json();
-    var contacts = searchData.contacts || [];
+    // Plate search — paginate through ALL contacts to check all vehicle plate custom fields
+    var match = null;
+    var page = 1;
+    var limit = 100;
 
-    var match = contacts.find(function(c) {
-      var fields = c.customFields || [];
-      var p1 = getVal(fields, V1_PLATE).toUpperCase().replace(/\s/g, '');
-      var p2 = getVal(fields, V2_PLATE).toUpperCase().replace(/\s/g, '');
-      var p3 = getVal(fields, V3_PLATE).toUpperCase().replace(/\s/g, '');
-      return p1 === plate || p2 === plate || p3 === plate;
-    });
+    while (!match) {
+      var url = 'https://services.leadconnectorhq.com/contacts/?locationId=' + locationId +
+                '&limit=' + limit + '&page=' + page;
+
+      var pageRes = await fetch(url, {
+        headers: { 'Authorization': 'Bearer ' + apiKey, 'Version': '2021-07-28' }
+      });
+      var pageData = await pageRes.json();
+      var contacts = pageData.contacts || [];
+
+      // No more contacts to search
+      if (contacts.length === 0) break;
+
+      match = contacts.find(function(c) {
+        var fields = c.customFields || [];
+        var p1 = getVal(fields, V1_PLATE).toUpperCase().replace(/\s/g, '');
+        var p2 = getVal(fields, V2_PLATE).toUpperCase().replace(/\s/g, '');
+        var p3 = getVal(fields, V3_PLATE).toUpperCase().replace(/\s/g, '');
+        return p1 === plate || p2 === plate || p3 === plate;
+      });
+
+      // If we got fewer than the limit, we've reached the last page
+      if (contacts.length < limit) break;
+
+      page++;
+    }
 
     if (!match) return { statusCode: 200, body: JSON.stringify({ found: false }) };
     return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formatResult(match)) };
