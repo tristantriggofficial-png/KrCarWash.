@@ -77,24 +77,24 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Payment failed. Please check your card details.' }) };
     }
 
-    // 4. Build GHL custom fields
+    // 4. Build GHL custom fields using correct GHL field keys
     const customField = {
-      membership_status: 'Active',
-      vehicle_make:  vehicleMake,
-      vehicle_model: vehicleModel,
-      license_plate: licensePlate,
-      member_id:     customer.id
+      'contact.membership_status': 'Active',
+      'contact.vehicle_make':  vehicleMake,
+      'contact.vehicle_model': vehicleModel,
+      'contact.vehicle_plate': licensePlate,
+      'contact.member_id':     customer.id
     };
 
     if (extraVehicles[0]) {
-      customField.vehicle_2_make  = extraVehicles[0].make  || '';
-      customField.vehicle_2_model = extraVehicles[0].model || '';
-      customField.vehicle_2_plate = extraVehicles[0].plate || '';
+      customField['contact.vehicle_2_make']  = extraVehicles[0].make  || '';
+      customField['contact.vehicle_2_model'] = extraVehicles[0].model || '';
+      customField['contact.vehicle_2_plate'] = extraVehicles[0].plate || '';
     }
     if (extraVehicles[1]) {
-      customField.vehicle_3_make  = extraVehicles[1].make  || '';
-      customField.vehicle_3_model = extraVehicles[1].model || '';
-      customField.vehicle_3_plate = extraVehicles[1].plate || '';
+      customField['contact.vehicle_3_make']  = extraVehicles[1].make  || '';
+      customField['contact.vehicle_3_model'] = extraVehicles[1].model || '';
+      customField['contact.vehicle_3_plate'] = extraVehicles[1].plate || '';
     }
 
     // 5. Create GHL contact
@@ -118,7 +118,7 @@ exports.handler = async (event) => {
     const ghlData = await ghlRes.json();
     const contactId = ghlData.contact?.id || customer.id;
 
-    // 6. Fire GHL workflow webhook
+    // 6. Fire GHL workflow webhook — now includes all extra vehicle data
     await fetch(GHL_WEBHOOK, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -133,7 +133,13 @@ exports.handler = async (event) => {
         vehicleMake,
         vehicleModel,
         licensePlate,
-        membershipStatus: 'Active'
+        membershipStatus: 'Active',
+        vehicle2Make:  extraVehicles[0]?.make  || '',
+        vehicle2Model: extraVehicles[0]?.model || '',
+        vehicle2Plate: extraVehicles[0]?.plate || '',
+        vehicle3Make:  extraVehicles[1]?.make  || '',
+        vehicle3Model: extraVehicles[1]?.model || '',
+        vehicle3Plate: extraVehicles[1]?.plate || ''
       })
     });
 
