@@ -4,8 +4,8 @@ const GHL_API_KEY  = process.env.GHL_API_KEY;
 const GHL_LOCATION = process.env.GHL_LOCATION_ID;
 const GHL_WEBHOOK  = 'https://services.leadconnectorhq.com/hooks/JavTzRLeF0lXtXbtz1oI/webhook-trigger/ec980ab9-7079-4b48-a531-07256335a30b';
 
-const PRICE_MAIN  = 'price_1TEzTgE552TsCUvBnY48S7Ha';
-const PRICE_EXTRA = 'price_1PMbLPE552TsCUvBCoeutYth';
+const PRICE_MAIN  = 'price_1TRF1OE552TsCUvB9vpGblVD';
+const PRICE_EXTRA = 'price_1TRF2AE552TsCUvBWle70tVX';
 
 exports.handler = async (event) => {
   const headers = {
