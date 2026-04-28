@@ -87,15 +87,15 @@ exports.handler = async (event) => {
     };
 
     if (extraVehicles[0]) {
-      customField['contact.vehicle_2_make']  = extraVehicles[0].make  || '';
-      customField['contact.vehicle_2_model'] = extraVehicles[0].model || '';
-      customField['contact.vehicle_2_plate'] = extraVehicles[0].plate || '';
-    }
-    if (extraVehicles[1]) {
-      customField['contact.vehicle_3_make']  = extraVehicles[1].make  || '';
-      customField['contact.vehicle_3_model'] = extraVehicles[1].model || '';
-      customField['contact.vehicle_3_plate'] = extraVehicles[1].plate || '';
-    }
+  customField['Vehicle_2_make']  = extraVehicles[0].make  || '';
+  customField['Vehicle_2_model'] = extraVehicles[0].model || '';
+  customField['Vehicle_2_plate'] = extraVehicles[0].plate || '';
+}
+if (extraVehicles[1]) {
+  customField['Vehicle_3_make']  = extraVehicles[1].make  || '';
+  customField['Vehicle_3_model'] = extraVehicles[1].model || '';
+  customField['Vehicle_3_plate'] = extraVehicles[1].plate || '';
+}
 
     // 5. Create GHL contact
     const ghlRes = await fetch('https://rest.gohighlevel.com/v1/contacts/', {
