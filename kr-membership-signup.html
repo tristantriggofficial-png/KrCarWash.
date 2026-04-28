@@ -158,7 +158,7 @@
     <span class="hero-pill">✓ No Contracts</span>
     <span class="hero-pill">✓ Cancel Anytime</span>
     <span class="hero-pill">✓ Instant Activation</span>
-    <span class="hero-pill">✓ $24.99 / Month</span>
+    <span class="hero-pill">✓ $29.99 / Month</span>
   </div>
 </div>
 
@@ -240,7 +240,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
         </svg>
-        Start My Membership — $24.99/mo
+        Start My Membership — $29.99/mo
       </button>
 
       <p class="secure-note">🔒 Secured by Stripe &nbsp;·&nbsp; PCI Compliant &nbsp;·&nbsp; 256-bit Encryption</p>
@@ -285,7 +285,7 @@
         <div class="mem-include-item"><span class="check">✓</span> Air Dry + Super Sealer</div>
       </div>
       <div class="mem-price-row">
-        <span class="big">$24.99</span>
+        <span class="big">$29.99</span>
         <span class="sm">/ month</span>
       </div>
       <p class="mem-cancel">No contracts · Cancel anytime · Instant activation</p>
@@ -381,12 +381,12 @@
 
   function updatePrice() {
     const count = document.querySelectorAll('.extra-vehicle').length;
-    const total = (24.99 + count * 19.99).toFixed(2);
+    const total = (29.99 + count * 24.99).toFixed(2);
     document.getElementById('totalAmount').textContent = `$${total}`;
     document.getElementById('submitBtn').textContent = `Start My Membership — $${total}/mo`;
     const note = count > 0
-      ? `Your card will be charged $${total}/month (1 vehicle at $24.99 + ${count} additional at $19.99 each). Cancel anytime.`
-      : 'Your card will be charged $24.99 today and automatically every month. Cancel anytime — no fees, no contracts.';
+      ? `Your card will be charged $${total}/month (1 vehicle at $29.99 + ${count} additional at $24.99 each). Cancel anytime.`
+      : 'Your card will be charged $29.99 today and automatically every month. Cancel anytime — no fees, no contracts.';
     document.getElementById('paymentNote').textContent = note;
   }
 
