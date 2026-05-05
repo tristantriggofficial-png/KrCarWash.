@@ -23,7 +23,6 @@
   *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
   html { scroll-behavior:smooth; }
   body { font-family:'Barlow', sans-serif; background:var(--off-white); color:var(--text-dark); overflow-x:hidden; min-height:100vh; }
-
   nav {
     background: rgba(26,111,168,0.97);
     backdrop-filter: blur(8px);
@@ -35,7 +34,6 @@
   .nav-logo span { color:var(--yellow); }
   .nav-back { font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:0.82rem; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.75); text-decoration:none; display:flex; align-items:center; gap:6px; transition:color 0.2s; }
   .nav-back:hover { color:var(--yellow); }
-
   .hero-strip { background:linear-gradient(135deg,#0d2a3e 0%,#1a6fa8 60%,#2e9fd4 100%); padding:56px 2rem 52px; text-align:center; position:relative; overflow:hidden; }
   .hero-strip::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 70% 50%,rgba(91,191,238,0.18) 0%,transparent 70%); pointer-events:none; }
   .hero-strip .eyebrow { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:0.78rem; letter-spacing:5px; text-transform:uppercase; color:var(--yellow); margin-bottom:0.6rem; animation:fadeDown 0.5s ease both; }
@@ -45,10 +43,8 @@
   .hero-pills { display:flex; gap:0.7rem; justify-content:center; flex-wrap:wrap; margin-top:1.4rem; animation:fadeDown 0.5s 0.3s ease both; }
   .hero-pill { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.22); border-radius:100px; padding:6px 16px; font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:0.8rem; letter-spacing:1px; color:rgba(255,255,255,0.9); text-transform:uppercase; }
   @keyframes fadeDown { from{opacity:0;transform:translateY(-14px)} to{opacity:1;transform:translateY(0)} }
-
   .main-wrap { max-width:1060px; margin:0 auto; padding:48px 1.5rem 80px; display:grid; grid-template-columns:1fr 380px; gap:2.4rem; align-items:start; }
   @media(max-width:860px){ .main-wrap{grid-template-columns:1fr} .sidebar{order:-1} }
-
   .form-card { background:var(--white); border-radius:20px; padding:2.4rem 2.2rem; box-shadow:0 8px 40px rgba(13,42,62,0.1); border:2px solid var(--blue-pale); }
   .form-section-title { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:0.72rem; letter-spacing:3px; text-transform:uppercase; color:var(--blue-mid); margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:2px solid var(--blue-pale); }
   .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
@@ -62,7 +58,6 @@
   .form-group input::placeholder { color:#a0b8c8; }
   .form-group input.error { border-color:var(--red); box-shadow:0 0 0 3px rgba(220,38,38,0.12); }
   .form-spacer { height:1.2rem; }
-
   /* Extra vehicle rows */
   .extra-vehicle { background:var(--off-white); border:2px solid var(--blue-pale); border-radius:12px; padding:1rem 1.2rem; margin-bottom:0.8rem; position:relative; }
   .extra-vehicle-title { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:0.68rem; letter-spacing:2px; text-transform:uppercase; color:var(--blue-mid); margin-bottom:0.8rem; }
@@ -70,7 +65,6 @@
   .remove-vehicle:hover { color:var(--red); }
   .add-vehicle-btn { width:100%; background:none; border:2px dashed var(--blue-pale); border-radius:10px; padding:11px; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:0.78rem; letter-spacing:2px; text-transform:uppercase; color:var(--blue-mid); cursor:pointer; transition:border-color 0.2s,color 0.2s; margin-bottom:1rem; }
   .add-vehicle-btn:hover { border-color:var(--blue-mid); color:var(--blue-dark); }
-
   /* Payment block */
   .payment-block { background:linear-gradient(135deg,#0d2a3e,#1a6fa8); border-radius:14px; padding:1.6rem 1.8rem; margin-bottom:1.4rem; }
   .payment-block-title { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:0.72rem; letter-spacing:3px; text-transform:uppercase; color:var(--yellow); margin-bottom:1rem; }
@@ -78,7 +72,6 @@
   .price-display .amount { font-family:'Bebas Neue',sans-serif; font-size:3.2rem; color:var(--white); line-height:1; letter-spacing:2px; }
   .price-display .period { font-family:'Barlow Condensed',sans-serif; font-size:1rem; color:rgba(255,255,255,0.6); letter-spacing:1px; }
   .payment-note { font-size:0.8rem; color:rgba(255,255,255,0.55); line-height:1.5; margin-bottom:1rem; }
-
   /* Stripe card element */
   #card-element {
     background:rgba(255,255,255,0.1);
@@ -90,16 +83,13 @@
   #card-element.StripeElement--focus { border-color:var(--yellow); }
   #card-element.StripeElement--invalid { border-color:#f87171; }
   #card-errors { color:#fca5a5; font-size:0.82rem; margin-top:0.5rem; min-height:1.2em; font-family:'Barlow Condensed',sans-serif; letter-spacing:0.5px; }
-
   .submit-btn { width:100%; background:var(--yellow); color:var(--text-dark); font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:3px; padding:16px 24px; border:none; border-radius:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 4px 24px rgba(245,197,24,0.35); transition:transform 0.2s,box-shadow 0.2s,background 0.2s; }
   .submit-btn:hover:not(:disabled) { background:#ffd000; transform:translateY(-2px); box-shadow:0 8px 32px rgba(245,197,24,0.45); }
   .submit-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
   .secure-note { display:flex; align-items:center; justify-content:center; gap:6px; margin-top:0.9rem; font-size:0.78rem; color:var(--text-mid); }
-
   /* General error */
   .form-error { background:#fee2e2; border:1.5px solid #fca5a5; border-radius:10px; padding:12px 16px; color:#991b1b; font-size:0.88rem; margin-bottom:1rem; display:none; }
   .form-error.visible { display:block; }
-
   /* Sidebar */
   .sidebar { display:flex; flex-direction:column; gap:1.4rem; }
   .mem-card { background:linear-gradient(145deg,#0d2a3e,#1a6fa8); border-radius:18px; padding:2rem 1.8rem; color:var(--white); position:relative; overflow:hidden; }
@@ -117,12 +107,10 @@
   .trust-badge { background:var(--white); border:2px solid var(--blue-pale); border-radius:10px; padding:0.9rem 0.6rem; text-align:center; }
   .trust-badge .trust-icon { font-size:1.3rem; margin-bottom:4px; }
   .trust-badge .trust-label { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:0.65rem; letter-spacing:1px; text-transform:uppercase; color:var(--text-mid); line-height:1.3; }
-
   .page-footer { background:#0d2a3e; padding:1.8rem 2rem; text-align:center; }
   .page-footer p { font-size:0.8rem; color:rgba(255,255,255,0.35); line-height:1.7; }
   .page-footer a { color:rgba(255,255,255,0.5); text-decoration:none; }
   .page-footer a:hover { color:var(--yellow); }
-
   /* Thank you */
   .thankyou { display:none; text-align:center; padding:3rem 2rem; }
   .thankyou.visible { display:block; }
@@ -134,14 +122,12 @@
   .thankyou-step { display:flex; align-items:center; gap:1rem; background:var(--blue-pale); border-radius:10px; padding:0.9rem 1.1rem; }
   .thankyou-step-num { width:28px; height:28px; background:var(--blue-mid); color:var(--white); font-family:'Bebas Neue',sans-serif; font-size:1rem; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .thankyou-step p { font-size:0.88rem; color:var(--text-dark); margin:0; }
-
   /* Spinner */
   @keyframes spin { to { transform:rotate(360deg); } }
   .spinner { width:20px; height:20px; border:2.5px solid rgba(13,42,62,0.3); border-top-color:var(--text-dark); border-radius:50%; animation:spin 0.7s linear infinite; display:inline-block; }
 </style>
 </head>
 <body>
-
 <nav>
   <a href="/" class="nav-logo">K<span>&</span>R Car Wash</a>
   <a href="/" class="nav-back">
@@ -149,7 +135,6 @@
     Back to Site
   </a>
 </nav>
-
 <div class="hero-strip">
   <div class="eyebrow">🚗 K&R Unlimited Club</div>
   <h1>Join The <span>Unlimited</span> Club</h1>
@@ -161,13 +146,10 @@
     <span class="hero-pill">✓ $29.99 / Month</span>
   </div>
 </div>
-
 <div class="main-wrap">
   <div>
     <div class="form-card" id="signupForm">
-
       <div class="form-error" id="formError"></div>
-
       <!-- Personal Info -->
       <div class="form-section-title">👤 Your Information</div>
       <div class="form-row">
@@ -191,10 +173,8 @@
           <input type="email" id="email" placeholder="you@email.com" required/>
         </div>
       </div>
-
       <div class="form-spacer"></div>
       <div class="form-spacer"></div>
-
       <!-- Primary Vehicle -->
       <div class="form-section-title">🚘 Primary Vehicle</div>
       <div class="form-row">
@@ -212,16 +192,12 @@
         <label>License Plate <span class="req">*</span></label>
         <input type="text" id="plate" placeholder="ABC1234" style="text-transform:uppercase;" required/>
       </div>
-
       <div class="form-spacer"></div>
-
-      <!-- Additional Vehicles -->
-      <div class="form-section-title">🚗 Additional Vehicles <span style="font-weight:400;color:#888;font-size:0.68rem;letter-spacing:1px;">+$24.99/mo each</span></div>
+      <!-- Additional Vehicle (max 1) -->
+      <div class="form-section-title">🚗 Additional Vehicle <span style="font-weight:400;color:#888;font-size:0.68rem;letter-spacing:1px;">+$24.99/mo</span></div>
       <div id="extraVehiclesContainer"></div>
-      <button type="button" class="add-vehicle-btn" onclick="addVehicle()">+ Add Another Vehicle</button>
-
+      <button type="button" class="add-vehicle-btn" id="addVehicleBtn" onclick="addVehicle()">+ Add a Second Vehicle</button>
       <div class="form-spacer"></div>
-
       <!-- Payment -->
       <div class="payment-block">
         <div class="payment-block-title">💳 Membership Payment</div>
@@ -235,18 +211,14 @@
         <div id="card-element"></div>
         <div id="card-errors"></div>
       </div>
-
       <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
         </svg>
         Start My Membership — $29.99/mo
       </button>
-
       <p class="secure-note">🔒 Secured by Stripe &nbsp;·&nbsp; PCI Compliant &nbsp;·&nbsp; 256-bit Encryption</p>
-
     </div>
-
     <!-- Thank You -->
     <div class="form-card thankyou" id="thankYouCard">
       <div class="thankyou-icon">🎉</div>
@@ -268,7 +240,6 @@
       </div>
     </div>
   </div>
-
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="mem-card">
@@ -306,7 +277,6 @@
     </div>
   </div>
 </div>
-
 <div class="page-footer">
   <p>
     © 2026 K&R Car Wash · 81729 Hwy 111, Indio CA 92201 ·
@@ -315,12 +285,10 @@
     Payments processed securely by Stripe.
   </p>
 </div>
-
 <script>
   const STRIPE_PK = 'pk_live_51LkCHXE552TsCUvBKcRC2fK66gvJMUTDxwGQCNDqrZrxPFnVqcgbPg48xqHDdfOgDLeB1HDMFG0hrc8yg8tu4pIf00SevVHByi';
   const stripe = Stripe(STRIPE_PK);
   const elements = stripe.elements();
-
   const cardElement = elements.create('card', {
     style: {
       base: {
@@ -334,25 +302,30 @@
       invalid: { color: '#fca5a5', iconColor: '#fca5a5' }
     }
   });
-
   cardElement.mount('#card-element');
-
   cardElement.on('change', ({ error }) => {
     document.getElementById('card-errors').textContent = error ? error.message : '';
   });
 
-  // Extra vehicles
+  // Extra vehicles — capped at 1
   let extraVehicleCount = 0;
 
   function addVehicle() {
+    // Only allow 1 additional vehicle
+    if (document.querySelectorAll('.extra-vehicle').length >= 1) return;
+
     extraVehicleCount++;
     const idx = extraVehicleCount;
     const container = document.getElementById('extraVehiclesContainer');
+
+    // Hide the add button once a vehicle is added
+    document.getElementById('addVehicleBtn').style.display = 'none';
+
     const div = document.createElement('div');
     div.className = 'extra-vehicle';
     div.id = `extra-${idx}`;
     div.innerHTML = `
-      <div class="extra-vehicle-title">Vehicle ${idx + 1}</div>
+      <div class="extra-vehicle-title">Vehicle 2</div>
       <button type="button" class="remove-vehicle" onclick="removeVehicle(${idx})">✕</button>
       <div class="form-row" style="margin-bottom:0.8rem;">
         <div class="form-group no-mb">
@@ -376,6 +349,8 @@
   function removeVehicle(idx) {
     const el = document.getElementById(`extra-${idx}`);
     if (el) el.remove();
+    // Show the add button again when vehicle is removed
+    document.getElementById('addVehicleBtn').style.display = '';
     updatePrice();
   }
 
@@ -385,7 +360,7 @@
     document.getElementById('totalAmount').textContent = `$${total}`;
     document.getElementById('submitBtn').textContent = `Start My Membership — $${total}/mo`;
     const note = count > 0
-      ? `Your card will be charged $${total}/month (1 vehicle at $29.99 + ${count} additional at $24.99 each). Cancel anytime.`
+      ? `Your card will be charged $${total}/month ($29.99 for your primary vehicle + $24.99 for the additional vehicle). Cancel anytime.`
       : 'Your card will be charged $29.99 today and automatically every month. Cancel anytime — no fees, no contracts.';
     document.getElementById('paymentNote').textContent = note;
   }
@@ -409,7 +384,6 @@
     el.classList.add('visible');
     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
-
   function clearError() {
     const el = document.getElementById('formError');
     el.textContent = '';
@@ -418,7 +392,6 @@
 
   async function handleSubmit() {
     clearError();
-
     const fields = ['firstName','lastName','phone','email','make','model','plate'];
     let valid = true;
     fields.forEach(id => {
@@ -430,18 +403,14 @@
         el.classList.remove('error');
       }
     });
-
     if (!valid) {
       showError('Please fill in all required fields.');
       return;
     }
-
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
     btn.innerHTML = '<div class="spinner"></div> Processing...';
-
     try {
-      // Create payment method
       const { paymentMethod, error: pmError } = await stripe.createPaymentMethod({
         type: 'card',
         card: cardElement,
@@ -451,15 +420,12 @@
           phone: document.getElementById('phone').value
         }
       });
-
       if (pmError) {
         showError(pmError.message);
         btn.disabled = false;
         btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Start My Membership`;
         return;
       }
-
-      // Call Netlify function
       const res = await fetch('/.netlify/functions/create-membership', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -475,9 +441,7 @@
           extraVehicles: getExtraVehicles()
         })
       });
-
       const data = await res.json();
-
       if (data.requiresAction) {
         const { error: actionError } = await stripe.confirmCardPayment(data.clientSecret);
         if (actionError) {
@@ -487,21 +451,18 @@
           return;
         }
       }
-
       if (data.error) {
         showError(data.error);
         btn.disabled = false;
         btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Start My Membership`;
         return;
       }
-
       // Success
       document.getElementById('signupForm').style.display = 'none';
       const ty = document.getElementById('thankYouCard');
       ty.style.display = 'block';
       ty.classList.add('visible');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-
     } catch (err) {
       showError('Something went wrong. Please try again or call us at (760) 972-4030.');
       btn.disabled = false;
