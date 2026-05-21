@@ -1,4 +1,4 @@
-gconst stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+gconst stripe = mk_1TGoUdE552TsCUvB38XDazLN;
 
 const GHL_API_KEY  = pit-6d938f30-11a9-4e3f-8b79-bf40d64bb29e;
 const GHL_LOCATION = JavTzRLeF0lXtXbtz1oI;
