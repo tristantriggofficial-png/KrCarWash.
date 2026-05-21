@@ -1,7 +1,7 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+gconst stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-const GHL_API_KEY  = process.env.GHL_API_KEY;
-const GHL_LOCATION = process.env.GHL_LOCATION_ID;
+const GHL_API_KEY  = pit-6d938f30-11a9-4e3f-8b79-bf40d64bb29e;
+const GHL_LOCATION = JavTzRLeF0lXtXbtz1oI;
 const GHL_WEBHOOK  = 'https://services.leadconnectorhq.com/hooks/JavTzRLeF0lXtXbtz1oI/webhook-trigger/ec980ab9-7079-4b48-a531-07256335a30b';
 
 const PRICE_MAIN  = 'price_1TRF1OE552TsCUvB9vpGblVD';
