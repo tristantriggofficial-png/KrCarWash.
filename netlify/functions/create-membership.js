@@ -1,7 +1,7 @@
-gconst stripe = mk_1TGoUdE552TsCUvB38XDazLN;
+gconst stripe = pk_live_51LkCHXE552TsCUvBKcRC2fK66gvJMUTDxwGQCNDqrZrxPFnVqcgbPg48xqHDdfOgDLeB1HDMFG0hrc8yg8tu4pIf00SevVHByi;
 
-const GHL_API_KEY  = pit-6d938f30-11a9-4e3f-8b79-bf40d64bb29e;
-const GHL_LOCATION = JavTzRLeF0lXtXbtz1oI;
+const GHL_API_KEY  = pit-9483db3e-209f-4e8b-ac72-a9d0c8c49878;
+const GHL_LOCATION = avTzRLeF0lXtXbtz1oI;
 const GHL_WEBHOOK  = 'https://services.leadconnectorhq.com/hooks/JavTzRLeF0lXtXbtz1oI/webhook-trigger/ec980ab9-7079-4b48-a531-07256335a30b';
 
 const PRICE_MAIN  = 'price_1TRF1OE552TsCUvB9vpGblVD';
